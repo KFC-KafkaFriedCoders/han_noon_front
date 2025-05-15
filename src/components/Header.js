@@ -3,8 +3,16 @@ import { IoMdMoon } from 'react-icons/io';
 import { IoSettingsSharp } from 'react-icons/io5';
 import { ImBook } from 'react-icons/im';
 import kfaImg from '../assets/image.png';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
+
+  const Navigate = useNavigate();
+  
+  const handleBookClick = () => {
+    Navigate('/monitor');
+  }
+
   return (
     <div className="bg-gray-700 p-4 flex items-center justify-between">
       <div className="flex items-center space-x-4">
@@ -25,7 +33,9 @@ const Header = () => {
           <IoSettingsSharp size={20} />
         </button>
         <button className="p-2 hover:bg-gray-600 rounded-full">
-          <ImBook size={20} />
+          <ImBook 
+          onClick={handleBookClick}
+          size={20} />
         </button>
       </div>
     </div>
