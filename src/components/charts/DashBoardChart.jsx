@@ -1,12 +1,10 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-// 샘플 데이터 생성 함수
 const generateData = (baseValue, variance, length = 30) => {
   const data = [];
   let lastValue = baseValue;
   
   for (let i = 0; i < length; i++) {
-    // 이전 값에서 변동을 주어 자연스러운 그래프 생성
     lastValue = Math.max(5, Math.min(95, lastValue + (Math.random() - 0.5) * variance));
     data.push({
       time: `11:${String(Math.floor(i * 2) + 10).padStart(2, '0')}`,
@@ -19,13 +17,11 @@ const generateData = (baseValue, variance, length = 30) => {
   return data;
 };
 
-const CPUChart = ({ title, multiLine = false, namespace = false }) => {
-  // 샘플 데이터 생성
+const DashBoardChart = ({ title, multiLine = false, namespace = false }) => {
   const baseValue = title.includes('Master') ? 50 : title.includes('Compute') ? 20 : 40;
   const variance = title.includes('Master') ? 30 : 15;
   const data = generateData(baseValue, variance);
   
-  // 색상 설정
   const getLineColors = () => {
     if (namespace) {
       return ['#8884d8', '#82ca9d', '#ffc658', '#ff8042'];
@@ -107,4 +103,4 @@ const CPUChart = ({ title, multiLine = false, namespace = false }) => {
   );
 };
 
-export default CPUChart;
+export default DashBoardChart;

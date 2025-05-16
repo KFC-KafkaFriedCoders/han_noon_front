@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import SystemMonitor from './pages/SystemMonitor';
 import MainDashboard from './pages/MainDashboard';
+
 function App() {
   return (
     <Router>
