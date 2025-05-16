@@ -32,7 +32,7 @@ const DashBoardChart = ({ title, multiLine = false, namespace = false }) => {
   return (
     <div className="bg-gray-900 p-3 rounded-lg">
       <div className="flex items-center mb-2">
-        <div className={`w-3 h-3 rounded-full mr-2 ${title.includes('CPU') ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+        <div className={`w-3 h-3 rounded-full mr-2 ${title ? 'bg-green-500' : 'bg-blue-500'}`}></div>
         <h3 className="text-sm font-medium text-gray-300">{title}</h3>
       </div>
       

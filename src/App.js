@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import SystemMonitor from './pages/SystemMonitor';
 import MainDashboard from './pages/MainDashboard';
+import PaymentLimitWebSocket from './WebSocket/PaymentLimitWebSocket';
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
       <Routes>
         <Route path="/" element={<MainDashboard />} />
         <Route path="/monitor" element={<SystemMonitor />} />
+        <Route path="/ws" element={<PaymentLimitWebSocket />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
