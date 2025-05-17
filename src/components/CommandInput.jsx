@@ -3,13 +3,28 @@ import { FaTerminal } from "react-icons/fa";
 
 const CommandInput = () => {
   const franchiseOptions = [
-    "더 본 코리아",
     "백다방",
     "한신포차",
+    "돌배기집",
+    "롤링파스타",
+    "리춘시장",
+    "막이오름",
+    "미정국수",
     "백스비어",
+    "백철판0410",
+    "본가",
+    "빽다방",
     "빽보이피자",
-    "역전우동",
-    "홍콩반점",
+    "새마을식당",
+    "성성식당",
+    "역전우동0410",
+    "연돈볼카츠",
+    "원조쌈밥집",
+    "인생설렁탕",
+    "제순식당",
+    "홍콩반점0410",
+    "홍콩분식",
+    "고투웍",
   ];
 
   const [selectedFranchise, setSelectedFranchise] = useState("더 본 코리아");
@@ -20,7 +35,6 @@ const CommandInput = () => {
 
   return (
     <div className="my-4">
-      <div></div>
       <div className="flex items-center mb-2 bg-gray-900 rounded p-2 group">
         <div className="text-gray-400 mr-2">
           <FaTerminal />

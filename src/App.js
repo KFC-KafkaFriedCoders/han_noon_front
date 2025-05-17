@@ -9,7 +9,6 @@ function App() {
       <Routes>
         <Route path="/" element={<MainDashboard />} />
         <Route path="/monitor" element={<SystemMonitor />} />
-        <Route path="/ws" element={<PaymentLimitWebSocket />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

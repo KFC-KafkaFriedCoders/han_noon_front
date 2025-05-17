@@ -1,6 +1,6 @@
 import React from "react";
 
-const PaymentLimitChart = ({
+const SamePersonChart = ({
   title,
   multiLine = false,
   namespace = false,
@@ -17,7 +17,7 @@ const PaymentLimitChart = ({
         {paymentArr.length > 0 ? (
           <ul className="space-y-2">
             {paymentArr.map((msg, index) => {
-              const messageText = msg.alert_message || msg.alertMessage; // 두 속성명 모두 체크
+              const messageText = msg.alertMessage || msg.alert_message; // 두 속성명 모두 체크
               
               return (
                 <li
@@ -25,9 +25,9 @@ const PaymentLimitChart = ({
                   className="bg-gray-800 text-gray-200 p-2 rounded text-sm"
                 >
                   <div>{messageText}</div>
-                  {msg.time && (
+                  {msg.server_received_time && (
                     <div className="text-xs text-gray-400 mt-1">
-                      {new Date(msg.time).toLocaleString()}
+                      {new Date(msg.server_received_time).toLocaleString()}
                     </div>
                   )}
                 </li>
@@ -46,4 +46,4 @@ const PaymentLimitChart = ({
   );
 };
 
-export default PaymentLimitChart;
+export default SamePersonChart;

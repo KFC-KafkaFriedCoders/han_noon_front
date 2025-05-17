@@ -1,0 +1,52 @@
+import React from "react";
+
+const SalesTotalChart = ({ title, salesData = [] }) => {
+  // 금액 포맷팅 함수
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW' }).format(amount);
+  };
+
+  return (
+    <div className="bg-gray-900 p-3 rounded-lg">
+      <div className="flex items-center mb-2">
+        <div className="w-3 h-3 rounded-full mr-2 bg-blue-500"></div>
+        <h3 className="text-sm font-medium text-gray-300">{title}</h3>
+      </div>
+
+      <div className="h-80 overflow-y-auto">
+        {salesData.length > 0 ? (
+          <ul className="space-y-2">
+            {salesData.map((data, index) => (
+              <li
+                key={index}
+                className="bg-gray-800 text-gray-200 p-2 rounded text-sm"
+              >
+                <div className="flex justify-between">
+                  <span className="font-semibold">{data.store_brand}</span>
+                  <span className="text-green-400">{formatCurrency(data.total_sales)}</span>
+                </div>
+                <div className="flex justify-between mt-1 text-xs text-gray-400">
+                  <span>매장 수: {data.store_count}</span>
+                  <span>가맹점 ID: {data.franchise_id}</span>
+                </div>
+                {data.update_time && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    업데이트: {data.update_time}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">
+              수신된 매출 데이터가 없습니다.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SalesTotalChart;
