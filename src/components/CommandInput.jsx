@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaTerminal } from "react-icons/fa";
+import { useBrand } from "../context/BrandContext";
 
 const CommandInput = () => {
   const franchiseOptions = [
@@ -27,10 +28,21 @@ const CommandInput = () => {
     "고투웍",
   ];
 
-  const [selectedFranchise, setSelectedFranchise] = useState("더 본 코리아");
+  const [inputSelectedBrand, setInputSelectedBrand] = useState("더 본 코리아");
+  const { setSelectedBrand } = useBrand();
 
   const handleExecute = () => {
-    console.log("Executing commands for:", selectedFranchise);
+    console.log("Executing commands for:", inputSelectedBrand);
+    setSelectedBrand(inputSelectedBrand);
+    
+    // 브랜드 선택이 변경되었음을 알림
+    // 여기서 WebSocket을 통해 서버에 브랜드 선택을 전송할 수 있음
+    if (window.stompClient && window.stompClient.connected) {
+      window.stompClient.publish({
+        destination: '/app/select-brand',
+        body: JSON.stringify({ brand: inputSelectedBrand })
+      });
+    }
   };
 
   return (
@@ -40,8 +52,8 @@ const CommandInput = () => {
           <FaTerminal />
         </div>
         <select
-          value={selectedFranchise}
-          onChange={(e) => setSelectedFranchise(e.target.value)}
+          value={inputSelectedBrand}
+          onChange={(e) => setInputSelectedBrand(e.target.value)}
           className="flex-grow bg-transparent border-none focus:outline-none text-gray-300"
         >
           {franchiseOptions.map((option, idx) => (
