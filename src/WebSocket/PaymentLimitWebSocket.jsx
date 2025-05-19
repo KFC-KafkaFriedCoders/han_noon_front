@@ -42,14 +42,32 @@ const PaymentLimitWebSocket = () => {
     }
     return [];
   });
+  
+  // 매출 데이터도 localStorage에서 로드하도록 수정
   const [salesTotalData, setSalesTotalData] = useState(() => {
     const savedData = localStorage.getItem("salesTotalData");
-    // 매출 데이터는 최신 데이터만 유지 (localStorage에서 로드하지 않음)
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // 기존 메시지에 ID가 없는 경우 추가
+      return parsed.map(msg => ({
+        ...msg,
+        id: msg.id || Date.now() + Math.random()
+      }));
+    }
     return [];
   });
   
+  // Top Stores 데이터도 localStorage에서 로드하도록 수정
   const [topStoresData, setTopStoresData] = useState(() => {
-    // Top Stores 데이터도 최신 데이터만 유지 (localStorage에서 로드하지 않음)
+    const savedData = localStorage.getItem("topStoresData");
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // 기존 메시지에 ID가 없는 경우 추가
+      return parsed.map(msg => ({
+        ...msg,
+        id: msg.id || Date.now() + Math.random()
+      }));
+    }
     return [];
   });
   
@@ -119,10 +137,15 @@ const PaymentLimitWebSocket = () => {
     localStorage.setItem("samePersonData", JSON.stringify(samePersonResponse));
   }, [samePersonResponse]);
   
+  // 매출 데이터도 localStorage에 저장하도록 수정
   useEffect(() => {
-    // 매출 데이터는 localStorage에 저장하지 않음 (최신 데이터만 유지)
-    // localStorage.setItem("salesTotalData", JSON.stringify(salesTotalData));
+    localStorage.setItem("salesTotalData", JSON.stringify(salesTotalData));
   }, [salesTotalData]);
+
+  // Top Stores 데이터도 localStorage에 저장하도록 수정
+  useEffect(() => {
+    localStorage.setItem("topStoresData", JSON.stringify(topStoresData));
+  }, [topStoresData]);
 
   useEffect(() => {
     const socket = new SockJS("http://localhost:8080/payment-limit-ws");
@@ -217,7 +240,7 @@ const PaymentLimitWebSocket = () => {
           const messageId = Date.now() + Math.random();
           const messageWithId = { ...data, id: messageId };
           
-          // 매출 데이터는 최신 데이터만 유지 (브랜드별 간단 대체)
+          // 매출 데이터도 기존과 동일하게 처리 (브랜드별 대체)
           setSalesTotalData((prev) => {
             const existingBrandIndex = prev.findIndex(item => item.store_brand === data.store_brand);
             
@@ -301,7 +324,7 @@ const PaymentLimitWebSocket = () => {
           const messageId = Date.now() + Math.random();
           const messageWithId = { ...data, id: messageId };
           
-          // Top Stores 데이터는 최신 데이터만 유지 (브랜드별 간단 대체)
+          // Top Stores 데이터도 기존과 동일하게 처리 (브랜드별 대체)
           setTopStoresData((prev) => {
             const existingBrandIndex = prev.findIndex(item => item.store_brand === data.store_brand);
             
