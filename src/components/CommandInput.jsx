@@ -4,7 +4,7 @@ import { useBrand } from "../context/BrandContext";
 
 const CommandInput = () => {
   const franchiseOptions = [
-    "백다방",
+    "빽다방",
     "한신포차",
     "돌배기집",
     "롤링파스타",
@@ -14,7 +14,6 @@ const CommandInput = () => {
     "백스비어",
     "백철판0410",
     "본가",
-    "빽다방",
     "빽보이피자",
     "새마을식당",
     "성성식당",
@@ -26,9 +25,10 @@ const CommandInput = () => {
     "홍콩반점0410",
     "홍콩분식",
     "고투웍",
+    "대한국밥"
   ];
 
-  const [inputSelectedBrand, setInputSelectedBrand] = useState("더 본 코리아");
+  const [inputSelectedBrand, setInputSelectedBrand] = useState("빽다방");
   const { setSelectedBrand } = useBrand();
 
   const handleExecute = () => {

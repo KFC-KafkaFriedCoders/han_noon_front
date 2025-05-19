@@ -4,6 +4,7 @@ import { Client } from "@stomp/stompjs";
 import PaymentLimitChart from "../components/charts/PaymentLimitChart";
 import SamePersonChart from "../components/charts/SamPersonChart";
 import SalesTotalChart from "../components/charts/SalesTotalChart";
+import FranchiseTopStores from "../components/charts/FranchiseTopStores";
 import { useBrand } from "../context/BrandContext";
 
 const MAX_MESSAGES = 30;
@@ -43,14 +44,12 @@ const PaymentLimitWebSocket = () => {
   });
   const [salesTotalData, setSalesTotalData] = useState(() => {
     const savedData = localStorage.getItem("salesTotalData");
-    if (savedData) {
-      const parsed = JSON.parse(savedData);
-      // 기존 메시지에 ID가 없는 경우 추가
-      return parsed.map(msg => ({
-        ...msg,
-        id: msg.id || Date.now() + Math.random()
-      })).slice(0, MAX_MESSAGES);
-    }
+    // 매출 데이터는 최신 데이터만 유지 (localStorage에서 로드하지 않음)
+    return [];
+  });
+  
+  const [topStoresData, setTopStoresData] = useState(() => {
+    // Top Stores 데이터도 최신 데이터만 유지 (localStorage에서 로드하지 않음)
     return [];
   });
   
@@ -58,8 +57,59 @@ const PaymentLimitWebSocket = () => {
   const [unreadPaymentLimit, setUnreadPaymentLimit] = useState(new Set());
   const [unreadSamePerson, setUnreadSamePerson] = useState(new Set());
   const [unreadSalesTotal, setUnreadSalesTotal] = useState(new Set());
+  const [unreadTopStores, setUnreadTopStores] = useState(new Set());
   
   const [connected, setConnected] = useState(false);
+
+  // selectedBrand가 변경될 때 변경전 브랜드의 읽지 않은 메시지 정리
+  useEffect(() => {
+    if (selectedBrand !== null) {
+      // 변경된 브랜드에 해당하지 않는 메시지를 읽지 않음에서 제거
+      setUnreadPaymentLimit(prev => {
+        const filtered = new Set();
+        prev.forEach(messageId => {
+          const message = paymentLimitresponse.find(item => item.id === messageId);
+          if (message && message.store_brand === selectedBrand) {
+            filtered.add(messageId);
+          }
+        });
+        return filtered;
+      });
+      
+      setUnreadSamePerson(prev => {
+        const filtered = new Set();
+        prev.forEach(messageId => {
+          const message = samePersonResponse.find(item => item.id === messageId);
+          if (message && message.store_brand === selectedBrand) {
+            filtered.add(messageId);
+          }
+        });
+        return filtered;
+      });
+      
+      setUnreadSalesTotal(prev => {
+        const filtered = new Set();
+        prev.forEach(messageId => {
+          const message = salesTotalData.find(item => item.id === messageId);
+          if (message && message.store_brand === selectedBrand) {
+            filtered.add(messageId);
+          }
+        });
+        return filtered;
+      });
+      
+      setUnreadTopStores(prev => {
+        const filtered = new Set();
+        prev.forEach(messageId => {
+          const message = topStoresData.find(item => item.id === messageId);
+          if (message && message.store_brand === selectedBrand) {
+            filtered.add(messageId);
+          }
+        });
+        return filtered;
+      });
+    }
+  }, [selectedBrand, paymentLimitresponse, samePersonResponse, salesTotalData, topStoresData]);
 
   useEffect(() => {
     localStorage.setItem("paymentLimitData", JSON.stringify(paymentLimitresponse));
@@ -70,14 +120,14 @@ const PaymentLimitWebSocket = () => {
   }, [samePersonResponse]);
   
   useEffect(() => {
-    localStorage.setItem("salesTotalData", JSON.stringify(salesTotalData));
+    // 매출 데이터는 localStorage에 저장하지 않음 (최신 데이터만 유지)
+    // localStorage.setItem("salesTotalData", JSON.stringify(salesTotalData));
   }, [salesTotalData]);
 
   useEffect(() => {
     const socket = new SockJS("http://localhost:8080/payment-limit-ws");
     const stompClient = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => console.log(str),
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
@@ -120,7 +170,6 @@ const PaymentLimitWebSocket = () => {
       stompClient.subscribe("/topic/payment-same-user", (message) => {
         try {
           const data = JSON.parse(message.body);
-          console.log("수신된 데이터:", data);
           
           // 고유 ID 추가 (시간 기반)
           const messageId = Date.now() + Math.random();
@@ -154,27 +203,25 @@ const PaymentLimitWebSocket = () => {
       stompClient.subscribe("/topic/sales-total", (message) => {
         try {
           const data = JSON.parse(message.body);
-          console.log("원래 토픽 매출 데이터 수신:", data);
           
           // 고유 ID 추가 (시간 기반)
           const messageId = Date.now() + Math.random();
           const messageWithId = { ...data, id: messageId };
           
+          // 매출 데이터는 최신 데이터만 유지 (브랜드별 간단 대체)
           setSalesTotalData((prev) => {
-            const existingIndex = prev.findIndex(item => 
-              item.store_brand === data.store_brand && 
-              item.update_time === data.update_time
-            );
+            const existingBrandIndex = prev.findIndex(item => item.store_brand === data.store_brand);
             
-            if (existingIndex >= 0) {
+            if (existingBrandIndex >= 0) {
+              // 기존 브랜드 데이터 대체
               const newData = [...prev];
-              newData[existingIndex] = messageWithId;
-              return newData;
-            } else {
-              const newData = [messageWithId, ...prev].slice(0, MAX_MESSAGES);
-              // 새로운 메시지만 읽지 않음으로 표시
+              newData[existingBrandIndex] = messageWithId;
               setUnreadSalesTotal(prevUnread => new Set([...prevUnread, messageId]));
               return newData;
+            } else {
+              // 새로운 브랜드 데이터 추가
+              setUnreadSalesTotal(prevUnread => new Set([...prevUnread, messageId]));
+              return [messageWithId, ...prev];
             }
           });
         } catch (e) {
@@ -185,11 +232,10 @@ const PaymentLimitWebSocket = () => {
       stompClient.subscribe("/user/topic/brand-data", (message) => {
         try {
           const response = JSON.parse(message.body);
-          console.log("브랜드 데이터 배치 수신:", response);
           
           if (response.event_type === "brand_data_batch") {
             if (response.items && Array.isArray(response.items)) {
-              // 배치 데이터에 ID 추가
+              // 배치 데이터에 ID 추가 (역사적 데이터이므로 읽지 않음 배지 없음)
               const itemsWithIds = response.items.map(item => ({
                 ...item,
                 id: item.id || Date.now() + Math.random()
@@ -208,26 +254,25 @@ const PaymentLimitWebSocket = () => {
       stompClient.subscribe("/user/topic/brand-data-update", (message) => {
         try {
           const data = JSON.parse(message.body);
-          console.log("브랜드 데이터 업데이트 수신:", data);
           
           // 고유 ID 추가
           const messageId = Date.now() + Math.random();
           const messageWithId = { ...data, id: messageId };
           
+          // 브랜드별 최신 데이터만 유지 (기존 데이터 대체)
           setSalesTotalData((prev) => {
-            const existingIndex = prev.findIndex(item => 
-              item.update_time === data.update_time
-            );
+            const existingBrandIndex = prev.findIndex(item => item.store_brand === data.store_brand);
             
-            if (existingIndex >= 0) {
+            if (existingBrandIndex >= 0) {
+              // 기존 브랜드 데이터 대체
               const newData = [...prev];
-              newData[existingIndex] = messageWithId;
-              return newData;
-            } else {
-              const newData = [messageWithId, ...prev].slice(0, MAX_MESSAGES);
-              // 새로운 메시지로 읽지 않음 표시
+              newData[existingBrandIndex] = messageWithId;
               setUnreadSalesTotal(prevUnread => new Set([...prevUnread, messageId]));
               return newData;
+            } else {
+              // 새로운 브랜드 데이터 추가
+              setUnreadSalesTotal(prevUnread => new Set([...prevUnread, messageId]));
+              return [messageWithId, ...prev];
             }
           });
         } catch (e) {
@@ -236,7 +281,87 @@ const PaymentLimitWebSocket = () => {
       });
       
       stompClient.subscribe("/user/topic/brand-selection", (message) => {
-        console.log("브랜드 선택 확인:", message.body);
+      });
+      
+      stompClient.subscribe("/topic/top-stores", (message) => {
+        try {
+          const data = JSON.parse(message.body);
+          console.log("원래 토픽 Top Stores 데이터 수신:", data);
+          
+          // 고유 ID 추가 (시간 기반)
+          const messageId = Date.now() + Math.random();
+          const messageWithId = { ...data, id: messageId };
+          
+          // Top Stores 데이터는 최신 데이터만 유지 (브랜드별 간단 대체)
+          setTopStoresData((prev) => {
+            const existingBrandIndex = prev.findIndex(item => item.store_brand === data.store_brand);
+            
+            if (existingBrandIndex >= 0) {
+              // 기존 브랜드 데이터 대체
+              const newData = [...prev];
+              newData[existingBrandIndex] = messageWithId;
+              setUnreadTopStores(prevUnread => new Set([...prevUnread, messageId]));
+              return newData;
+            } else {
+              // 새로운 브랜드 데이터 추가
+              setUnreadTopStores(prevUnread => new Set([...prevUnread, messageId]));
+              return [messageWithId, ...prev];
+            }
+          });
+        } catch (e) {
+          console.error("메시지 파싱 오류:", e);
+        }
+      });
+      
+      stompClient.subscribe("/user/topic/top-stores-data", (message) => {
+        try {
+          const response = JSON.parse(message.body);
+          
+          if (response.event_type === "top_stores_data_batch") {
+            if (response.data) {
+              // 배치 데이터에 ID 추가 (역사적 데이터이므로 읽지 않음 배지 없음)
+              const dataWithId = {
+                ...response.data,
+                id: response.data.id || Date.now() + Math.random()
+              };
+              setTopStoresData([dataWithId]);
+            }
+          } else if (response.event_type === "top_stores_data_empty") {
+            setTopStoresData([]);
+          }
+        } catch (e) {
+          console.error("메시지 파싱 오류:", e);
+        }
+      });
+      
+      stompClient.subscribe("/user/topic/top-stores-data-update", (message) => {
+        try {
+          const data = JSON.parse(message.body);
+          console.log("Top Stores 브랜드 데이터 업데이트 수신:", data);
+          
+          // 고유 ID 추가
+          const messageId = Date.now() + Math.random();
+          const messageWithId = { ...data, id: messageId };
+          
+          // 브랜드별 최신 데이터만 유지 (기존 데이터 대체)
+          setTopStoresData((prev) => {
+            const existingBrandIndex = prev.findIndex(item => item.store_brand === data.store_brand);
+            
+            if (existingBrandIndex >= 0) {
+              // 기존 브랜드 데이터 대체
+              const newData = [...prev];
+              newData[existingBrandIndex] = messageWithId;
+              setUnreadTopStores(prevUnread => new Set([...prevUnread, messageId]));
+              return newData;
+            } else {
+              // 새로운 브랜드 데이터 추가
+              setUnreadTopStores(prevUnread => new Set([...prevUnread, messageId]));
+              return [messageWithId, ...prev];
+            }
+          });
+        } catch (e) {
+          console.error("멤시지 파싱 오류:", e);
+        }
       });
     };
 
@@ -260,7 +385,6 @@ const PaymentLimitWebSocket = () => {
     };
   }, []);
 
-  // 카드 클릭 핸들러
   const handlePaymentLimitCardClick = (messageId) => {
     setUnreadPaymentLimit(prev => {
       const newSet = new Set(prev);
@@ -284,28 +408,52 @@ const PaymentLimitWebSocket = () => {
       return newSet;
     });
   };
+  
+  const handleTopStoresCardClick = (messageId) => {
+    setUnreadTopStores(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(messageId);
+      return newSet;
+    });
+  };
+  
+  const getFilteredUnreadMessages = (unreadSet, dataArray) => {
+    if (!selectedBrand) return unreadSet;
+    
+    const filteredUnread = new Set();
+    unreadSet.forEach(messageId => {
+      const message = dataArray.find(item => item.id === messageId);
+      if (message && message.store_brand === selectedBrand) {
+        filteredUnread.add(messageId);
+      }
+    });
+    return filteredUnread;
+  };
 
   return (
     <>
       <PaymentLimitChart 
         title="이상 결제 탐지" 
         paymentArr={filterDataByBrand(paymentLimitresponse)}
-        unreadMessages={unreadPaymentLimit}
+        unreadMessages={getFilteredUnreadMessages(unreadPaymentLimit, paymentLimitresponse)}
         onCardClick={handlePaymentLimitCardClick}
       />
       <SamePersonChart 
         title="동일인 결제 탐지" 
         paymentArr={filterDataByBrand(samePersonResponse)}
-        unreadMessages={unreadSamePerson}
+        unreadMessages={getFilteredUnreadMessages(unreadSamePerson, samePersonResponse)}
         onCardClick={handleSamePersonCardClick}
       />
       <SalesTotalChart 
         title="매출 총합 모니터링" 
         salesArr={filterDataByBrand(salesTotalData)}
-        unreadMessages={unreadSalesTotal}
         onCardClick={handleSalesTotalCardClick}
       />
-      
+      <FranchiseTopStores
+        title="매출 top 3" 
+        topStoresArr={filterDataByBrand(topStoresData)}
+        onCardClick={handleTopStoresCardClick}
+      />
       {connected && <div className="text-xs text-gray-500 p-2 bg-gray-800 rounded mt-2 mb-4">
         WebSocket 연결 상태: {connected ? "연결됨" : "연결 안됨"}
         {selectedBrand && <span className="ml-2">선택된 브랜드: {selectedBrand}</span>}
