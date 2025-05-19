@@ -7,7 +7,8 @@ import SalesTotalChart from "../components/charts/SalesTotalChart";
 import FranchiseTopStores from "../components/charts/FranchiseTopStores";
 import { useBrand } from "../context/BrandContext";
 
-const MAX_MESSAGES = 30;
+const MAX_MESSAGES = 15;
+const MAX_TIME_SERIES = 7; // 시간순 데이터 최대 개수를 15개에서 7개로 변경
 
 const PaymentLimitWebSocket = () => {
   const { selectedBrand } = useBrand();
@@ -21,10 +22,10 @@ const PaymentLimitWebSocket = () => {
     const savedData = localStorage.getItem("paymentLimitData");
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      // 기존 메시지에 ID가 없는 경우 추가
+      // 기존 ID 유지, 없는 경우에만 새로 생성
       return parsed.map(msg => ({
         ...msg,
-        id: msg.id || Date.now() + Math.random()
+        id: msg.id || `existing-${Date.now()}-${Math.random()}`
       })).slice(0, MAX_MESSAGES);
     }
     return [];
@@ -34,10 +35,10 @@ const PaymentLimitWebSocket = () => {
     const savedData = localStorage.getItem("samePersonData");
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      // 기존 메시지에 ID가 없는 경우 추가
+      // 기존 ID 유지, 없는 경우에만 새로 생성
       return parsed.map(msg => ({
         ...msg,
-        id: msg.id || Date.now() + Math.random()
+        id: msg.id || `existing-${Date.now()}-${Math.random()}`
       })).slice(0, MAX_MESSAGES);
     }
     return [];
@@ -48,13 +49,28 @@ const PaymentLimitWebSocket = () => {
     const savedData = localStorage.getItem("salesTotalData");
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      // 기존 메시지에 ID가 없는 경우 추가
+      // 기존 ID 유지, 없는 경우에만 새로 생성
       return parsed.map(msg => ({
         ...msg,
-        id: msg.id || Date.now() + Math.random()
+        id: msg.id || `existing-${Date.now()}-${Math.random()}`
       }));
     }
     return [];
+  });
+
+  // 브랜드별 시간순 누적 매출 데이터 관리
+  const [salesTimeSeriesData, setSalesTimeSeriesData] = useState(() => {
+    const savedData = localStorage.getItem("salesTimeSeriesData");
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // 기존 데이터가 15개를 초과하면 7개로 자르기
+      const trimmed = {};
+      Object.keys(parsed).forEach(brand => {
+        trimmed[brand] = parsed[brand].slice(0, MAX_TIME_SERIES);
+      });
+      return trimmed;
+    }
+    return {}; // { "브랜드명": [시간순_데이터] }
   });
   
   // Top Stores 데이터도 localStorage에서 로드하도록 수정
@@ -62,22 +78,52 @@ const PaymentLimitWebSocket = () => {
     const savedData = localStorage.getItem("topStoresData");
     if (savedData) {
       const parsed = JSON.parse(savedData);
-      // 기존 메시지에 ID가 없는 경우 추가
+      // 기존 ID 유지, 없는 경우에만 새로 생성
       return parsed.map(msg => ({
         ...msg,
-        id: msg.id || Date.now() + Math.random()
+        id: msg.id || `existing-${Date.now()}-${Math.random()}`
       }));
     }
     return [];
   });
   
-  // 읽지 않은 메시지를 추적하는 state
+  // 읽지 않은 메시지를 추적하는 state (localStorage에서 로드된 기존 메시지는 제외)
   const [unreadPaymentLimit, setUnreadPaymentLimit] = useState(new Set());
   const [unreadSamePerson, setUnreadSamePerson] = useState(new Set());
   const [unreadSalesTotal, setUnreadSalesTotal] = useState(new Set());
   const [unreadTopStores, setUnreadTopStores] = useState(new Set());
   
   const [connected, setConnected] = useState(false);
+
+  // 시간순 누적 데이터를 업데이트하는 함수
+  const updateSalesTimeSeries = (newSalesData) => {
+    const brand = newSalesData.store_brand;
+    if (!brand) return;
+
+    // 현재 시간과 총 매출 계산
+    const currentTime = new Date();
+    const currentSales = newSalesData.total_sales || 0;
+
+    const timePoint = {
+      time: currentTime.toISOString(),
+      displayTime: currentTime.toLocaleTimeString('ko-KR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }),
+      totalSales: currentSales,
+      timestamp: currentTime.getTime()
+    };
+
+    setSalesTimeSeriesData(prev => {
+      const brandData = prev[brand] || [];
+      const newBrandData = [timePoint, ...brandData].slice(0, MAX_TIME_SERIES);
+      
+      return {
+        ...prev,
+        [brand]: newBrandData
+      };
+    });
+  };
 
   // selectedBrand가 변경될 때 변경전 브랜드의 읽지 않은 메시지 정리
   useEffect(() => {
@@ -86,6 +132,8 @@ const PaymentLimitWebSocket = () => {
       setUnreadPaymentLimit(prev => {
         const filtered = new Set();
         prev.forEach(messageId => {
+          // existing- 접두사가 있는 기존 데이터는 unread에서 제외
+          if (messageId.toString().startsWith('existing-')) return;
           const message = paymentLimitresponse.find(item => item.id === messageId);
           if (message && message.store_brand === selectedBrand) {
             filtered.add(messageId);
@@ -97,6 +145,8 @@ const PaymentLimitWebSocket = () => {
       setUnreadSamePerson(prev => {
         const filtered = new Set();
         prev.forEach(messageId => {
+          // existing- 접두사가 있는 기존 데이터는 unread에서 제외
+          if (messageId.toString().startsWith('existing-')) return;
           const message = samePersonResponse.find(item => item.id === messageId);
           if (message && message.store_brand === selectedBrand) {
             filtered.add(messageId);
@@ -108,6 +158,8 @@ const PaymentLimitWebSocket = () => {
       setUnreadSalesTotal(prev => {
         const filtered = new Set();
         prev.forEach(messageId => {
+          // existing- 접두사가 있는 기존 데이터는 unread에서 제외
+          if (messageId.toString().startsWith('existing-')) return;
           const message = salesTotalData.find(item => item.id === messageId);
           if (message && message.store_brand === selectedBrand) {
             filtered.add(messageId);
@@ -119,6 +171,8 @@ const PaymentLimitWebSocket = () => {
       setUnreadTopStores(prev => {
         const filtered = new Set();
         prev.forEach(messageId => {
+          // existing- 접두사가 있는 기존 데이터는 unread에서 제외
+          if (messageId.toString().startsWith('existing-')) return;
           const message = topStoresData.find(item => item.id === messageId);
           if (message && message.store_brand === selectedBrand) {
             filtered.add(messageId);
@@ -141,6 +195,11 @@ const PaymentLimitWebSocket = () => {
   useEffect(() => {
     localStorage.setItem("salesTotalData", JSON.stringify(salesTotalData));
   }, [salesTotalData]);
+
+  // 시간순 매출 데이터를 localStorage에 저장
+  useEffect(() => {
+    localStorage.setItem("salesTimeSeriesData", JSON.stringify(salesTimeSeriesData));
+  }, [salesTimeSeriesData]);
 
   // Top Stores 데이터도 localStorage에 저장하도록 수정
   useEffect(() => {
@@ -174,8 +233,8 @@ const PaymentLimitWebSocket = () => {
       stompClient.subscribe("/topic/payment-limit", (message) => {
         try {
           const data = JSON.parse(message.body);
-          // 고유 ID 추가 (시간 기반)
-          const messageId = Date.now() + Math.random();
+          // 새로운 메시지에는 'new-' 접두사로 ID 생성
+          const messageId = `new-${Date.now()}-${Math.random()}`;
           const messageWithId = { ...data, id: messageId };
           
           setPaymentLimitResponse((prev) => {
@@ -183,11 +242,11 @@ const PaymentLimitWebSocket = () => {
             return newData;
           });
           
-          // 새 메시지를 읽지 않음으로 표시
+          // 새 메시지만 읽지 않음으로 표시
           setUnreadPaymentLimit(prev => new Set([...prev, messageId]));
         } catch (e) {
           console.error("메시지 파싱 오류:", e);
-          const messageId = Date.now() + Math.random();
+          const messageId = `new-${Date.now()}-${Math.random()}`;
           const messageWithId = { body: message.body, id: messageId };
           
           setPaymentLimitResponse((prev) => {
@@ -203,8 +262,8 @@ const PaymentLimitWebSocket = () => {
         try {
           const data = JSON.parse(message.body);
           
-          // 고유 ID 추가 (시간 기반)
-          const messageId = Date.now() + Math.random();
+          // 새로운 메시지에는 'new-' 접두사로 ID 생성
+          const messageId = `new-${Date.now()}-${Math.random()}`;
           const messageWithId = { ...data, id: messageId };
           
           setSamePersonResponse((prev) => {
@@ -212,11 +271,11 @@ const PaymentLimitWebSocket = () => {
             return newData;
           });
           
-          // 새 메시지를 읽지 않음으로 표시
+          // 새 메시지만 읽지 않음으로 표시
           setUnreadSamePerson(prev => new Set([...prev, messageId]));
         } catch (e) {
           console.error("메시지 파싱 오류:", e);
-          const messageId = Date.now() + Math.random();
+          const messageId = `new-${Date.now()}-${Math.random()}`;
           const messageWithId = { body: message.body, id: messageId };
           
           setSamePersonResponse((prev) => {
@@ -236,9 +295,12 @@ const PaymentLimitWebSocket = () => {
         try {
           const data = JSON.parse(message.body);
           
-          // 고유 ID 추가 (시간 기반)
-          const messageId = Date.now() + Math.random();
+          // 새로운 메시지에는 'new-' 접두사로 ID 생성
+          const messageId = `new-${Date.now()}-${Math.random()}`;
           const messageWithId = { ...data, id: messageId };
+          
+          // 시간순 누적 데이터 업데이트
+          updateSalesTimeSeries(data);
           
           // 매출 데이터도 기존과 동일하게 처리 (브랜드별 대체)
           setSalesTotalData((prev) => {
@@ -267,10 +329,10 @@ const PaymentLimitWebSocket = () => {
           
           if (response.event_type === "brand_data_batch") {
             if (response.items && Array.isArray(response.items)) {
-              // 배치 데이터에 ID 추가 (역사적 데이터이므로 읽지 않음 배지 없음)
+              // 배치 데이터는 기존 데이터이므로 'existing-' 접두사 사용 (읽지 않음 배지 없음)
               const itemsWithIds = response.items.map(item => ({
                 ...item,
-                id: item.id || Date.now() + Math.random()
+                id: item.id || `existing-${Date.now()}-${Math.random()}`
               }));
               setSalesTotalData(itemsWithIds);
             }
@@ -287,9 +349,12 @@ const PaymentLimitWebSocket = () => {
         try {
           const data = JSON.parse(message.body);
           
-          // 고유 ID 추가
-          const messageId = Date.now() + Math.random();
+          // 새로운 메시지에는 'new-' 접두사로 ID 생성
+          const messageId = `new-${Date.now()}-${Math.random()}`;
           const messageWithId = { ...data, id: messageId };
+          
+          // 시간순 누적 데이터 업데이트
+          updateSalesTimeSeries(data);
           
           // 브랜드별 최신 데이터만 유지 (기존 데이터 대체)
           setSalesTotalData((prev) => {
@@ -320,8 +385,8 @@ const PaymentLimitWebSocket = () => {
           const data = JSON.parse(message.body);
           console.log("원래 토픽 Top Stores 데이터 수신:", data);
           
-          // 고유 ID 추가 (시간 기반)
-          const messageId = Date.now() + Math.random();
+          // 새로운 메시지에는 'new-' 접두사로 ID 생성
+          const messageId = `new-${Date.now()}-${Math.random()}`;
           const messageWithId = { ...data, id: messageId };
           
           // Top Stores 데이터도 기존과 동일하게 처리 (브랜드별 대체)
@@ -351,10 +416,10 @@ const PaymentLimitWebSocket = () => {
           
           if (response.event_type === "top_stores_data_batch") {
             if (response.data) {
-              // 배치 데이터에 ID 추가 (역사적 데이터이므로 읽지 않음 배지 없음)
+              // 배치 데이터는 기존 데이터이므로 'existing-' 접두사 사용 (읽지 않음 배지 없음)
               const dataWithId = {
                 ...response.data,
-                id: response.data.id || Date.now() + Math.random()
+                id: response.data.id || `existing-${Date.now()}-${Math.random()}`
               };
               setTopStoresData([dataWithId]);
             }
@@ -371,8 +436,8 @@ const PaymentLimitWebSocket = () => {
           const data = JSON.parse(message.body);
           console.log("Top Stores 브랜드 데이터 업데이트 수신:", data);
           
-          // 고유 ID 추가
-          const messageId = Date.now() + Math.random();
+          // 새로운 메시지에는 'new-' 접두사로 ID 생성
+          const messageId = `new-${Date.now()}-${Math.random()}`;
           const messageWithId = { ...data, id: messageId };
           
           // 브랜드별 최신 데이터만 유지 (기존 데이터 대체)
@@ -473,6 +538,14 @@ const PaymentLimitWebSocket = () => {
     return filteredUnread;
   };
 
+  // 현재 선택된 브랜드의 시간순 데이터 가져오기
+  const getCurrentBrandTimeSeries = () => {
+    if (!selectedBrand || !salesTimeSeriesData[selectedBrand]) {
+      return [];
+    }
+    return salesTimeSeriesData[selectedBrand];
+  };
+
   return (
     <>
       <PaymentLimitChart 
@@ -490,6 +563,7 @@ const PaymentLimitWebSocket = () => {
       <SalesTotalChart 
         title="매출 총합 모니터링" 
         salesArr={filterDataByBrand(salesTotalData)}
+        timeSeriesData={getCurrentBrandTimeSeries()}
         onCardClick={handleSalesTotalCardClick}
       />
       <FranchiseTopStores

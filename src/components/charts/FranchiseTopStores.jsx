@@ -14,7 +14,7 @@ const FranchiseTopStores = ({
         </div>
       </div>
 
-      <div className="h-80 overflow-y-auto">
+      <div className="h-120 overflow-y-auto">
         {console.log("topStoresArr", topStoresArr)}
         {topStoresArr.length > 0 ? (
           <ul className="space-y-3">
