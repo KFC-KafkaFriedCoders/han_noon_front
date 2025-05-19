@@ -17,7 +17,7 @@ const PaymentLimitChart = ({
         {paymentArr.length > 0 ? (
           <ul className="space-y-2">
             {paymentArr.map((msg, index) => {
-              const messageText = msg.alert_message || msg.alertMessage; // 두 속성명 모두 체크
+              const messageText = msg.alert_message || msg.alertMessage;
               
               return (
                 <li

@@ -5,18 +5,16 @@ import PaymentLimitChart from "../components/charts/PaymentLimitChart";
 import SamePersonChart from "../components/charts/SamPersonChart";
 import { useBrand } from "../context/BrandContext";
 
-const MAX_MESSAGES = 30; // 최대 메시지 개수 상수
+const MAX_MESSAGES = 30;
 
 const PaymentLimitWebSocket = () => {
   const { selectedBrand } = useBrand();
   
-  // 출력할 데이터를 필터링하는 함수
   const filterDataByBrand = (data) => {
     if (!selectedBrand) return data;
     return data.filter(item => item.store_brand === selectedBrand);
   }
 
-  // 로컬 스토리지에서 기존 데이터 가져오기 또는 빈 배열로 초기화
   const [paymentLimitresponse, setPaymentLimitResponse] = useState(() => {
     const savedData = localStorage.getItem("paymentLimitData");
     return savedData ? JSON.parse(savedData).slice(0, MAX_MESSAGES) : [];
@@ -33,7 +31,6 @@ const PaymentLimitWebSocket = () => {
   
   const [connected, setConnected] = useState(false);
 
-  // 데이터가 변경될 때마다 로컬 스토리지에 저장
   useEffect(() => {
     localStorage.setItem("paymentLimitData", JSON.stringify(paymentLimitresponse));
   }, [paymentLimitresponse]);
@@ -42,7 +39,6 @@ const PaymentLimitWebSocket = () => {
     localStorage.setItem("samePersonData", JSON.stringify(samePersonResponse));
   }, [samePersonResponse]);
   
-  // 세일즈 데이터 저장
   useEffect(() => {
     localStorage.setItem("salesTotalData", JSON.stringify(salesTotalData));
   }, [salesTotalData]);
@@ -61,7 +57,6 @@ const PaymentLimitWebSocket = () => {
       console.log("WebSocket 연결 성공:", frame);
       setConnected(true);
       
-      // 전역 변수로 stompClient 설정 (다른 컴포넌트에서 접근 가능하도록)
       window.stompClient = stompClient;
 
       stompClient.subscribe("/topic/payment-limit", (message) => {
@@ -80,7 +75,6 @@ const PaymentLimitWebSocket = () => {
         }
       });
 
-      // 동일인 결제 탐지 구독
       stompClient.subscribe("/topic/payment-same-user", (message) => {
         try {
           const data = JSON.parse(message.body);
@@ -98,12 +92,10 @@ const PaymentLimitWebSocket = () => {
         }
       });
 
-      // 서버 상태 구독
       stompClient.subscribe("/topic/server-status", (message) => {
         console.log("서버 상태:", message.body);
       });
       
-      // 매출 데이터 기본 토픽 (후방 호환을 위해)
       stompClient.subscribe("/topic/sales-total", (message) => {
         try {
           const data = JSON.parse(message.body);
@@ -127,19 +119,16 @@ const PaymentLimitWebSocket = () => {
         }
       });
       
-      // 브랜드 선택 후 캐시된 데이터 배치 수신
       stompClient.subscribe("/user/topic/brand-data", (message) => {
         try {
           const response = JSON.parse(message.body);
           console.log("브랜드 데이터 배치 수신:", response);
           
           if (response.event_type === "brand_data_batch") {
-            // 브랜드별 캐시된 데이터 배치 수신
             if (response.items && Array.isArray(response.items)) {
               setSalesTotalData(response.items);
             }
           } else if (response.event_type === "brand_data_empty") {
-            // 브랜드 데이터가 없을 경우
             setSalesTotalData([]);
             console.log("선택한 브랜드의 데이터가 없습니다:", response.brand);
           }
@@ -148,7 +137,6 @@ const PaymentLimitWebSocket = () => {
         }
       });
       
-      // 브랜드 데이터 실시간 업데이트 수신
       stompClient.subscribe("/user/topic/brand-data-update", (message) => {
         try {
           const data = JSON.parse(message.body);
@@ -172,7 +160,6 @@ const PaymentLimitWebSocket = () => {
         }
       });
       
-      // 브랜드 선택 확인 메시지 구독
       stompClient.subscribe("/user/topic/brand-selection", (message) => {
         console.log("브랜드 선택 확인:", message.body);
       });
