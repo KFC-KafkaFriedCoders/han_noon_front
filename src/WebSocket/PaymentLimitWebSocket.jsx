@@ -3,6 +3,7 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import PaymentLimitChart from "../components/charts/PaymentLimitChart";
 import SamePersonChart from "../components/charts/SamPersonChart";
+import SalesTotalChart from "../components/charts/SalesTotalChart";
 import { useBrand } from "../context/BrandContext";
 
 const MAX_MESSAGES = 30;
@@ -42,12 +43,21 @@ const PaymentLimitWebSocket = () => {
   });
   const [salesTotalData, setSalesTotalData] = useState(() => {
     const savedData = localStorage.getItem("salesTotalData");
-    return savedData ? JSON.parse(savedData).slice(0, MAX_MESSAGES) : [];
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // 기존 메시지에 ID가 없는 경우 추가
+      return parsed.map(msg => ({
+        ...msg,
+        id: msg.id || Date.now() + Math.random()
+      })).slice(0, MAX_MESSAGES);
+    }
+    return [];
   });
   
   // 읽지 않은 메시지를 추적하는 state
   const [unreadPaymentLimit, setUnreadPaymentLimit] = useState(new Set());
   const [unreadSamePerson, setUnreadSamePerson] = useState(new Set());
+  const [unreadSalesTotal, setUnreadSalesTotal] = useState(new Set());
   
   const [connected, setConnected] = useState(false);
 
@@ -145,6 +155,11 @@ const PaymentLimitWebSocket = () => {
         try {
           const data = JSON.parse(message.body);
           console.log("원래 토픽 매출 데이터 수신:", data);
+          
+          // 고유 ID 추가 (시간 기반)
+          const messageId = Date.now() + Math.random();
+          const messageWithId = { ...data, id: messageId };
+          
           setSalesTotalData((prev) => {
             const existingIndex = prev.findIndex(item => 
               item.store_brand === data.store_brand && 
@@ -153,10 +168,13 @@ const PaymentLimitWebSocket = () => {
             
             if (existingIndex >= 0) {
               const newData = [...prev];
-              newData[existingIndex] = data;
+              newData[existingIndex] = messageWithId;
               return newData;
             } else {
-              return [data, ...prev].slice(0, MAX_MESSAGES);
+              const newData = [messageWithId, ...prev].slice(0, MAX_MESSAGES);
+              // 새로운 메시지만 읽지 않음으로 표시
+              setUnreadSalesTotal(prevUnread => new Set([...prevUnread, messageId]));
+              return newData;
             }
           });
         } catch (e) {
@@ -171,7 +189,12 @@ const PaymentLimitWebSocket = () => {
           
           if (response.event_type === "brand_data_batch") {
             if (response.items && Array.isArray(response.items)) {
-              setSalesTotalData(response.items);
+              // 배치 데이터에 ID 추가
+              const itemsWithIds = response.items.map(item => ({
+                ...item,
+                id: item.id || Date.now() + Math.random()
+              }));
+              setSalesTotalData(itemsWithIds);
             }
           } else if (response.event_type === "brand_data_empty") {
             setSalesTotalData([]);
@@ -187,6 +210,10 @@ const PaymentLimitWebSocket = () => {
           const data = JSON.parse(message.body);
           console.log("브랜드 데이터 업데이트 수신:", data);
           
+          // 고유 ID 추가
+          const messageId = Date.now() + Math.random();
+          const messageWithId = { ...data, id: messageId };
+          
           setSalesTotalData((prev) => {
             const existingIndex = prev.findIndex(item => 
               item.update_time === data.update_time
@@ -194,14 +221,17 @@ const PaymentLimitWebSocket = () => {
             
             if (existingIndex >= 0) {
               const newData = [...prev];
-              newData[existingIndex] = data;
+              newData[existingIndex] = messageWithId;
               return newData;
             } else {
-              return [data, ...prev].slice(0, MAX_MESSAGES);
+              const newData = [messageWithId, ...prev].slice(0, MAX_MESSAGES);
+              // 새로운 메시지로 읽지 않음 표시
+              setUnreadSalesTotal(prevUnread => new Set([...prevUnread, messageId]));
+              return newData;
             }
           });
         } catch (e) {
-          console.error("메시지 파싱 오류:", e);
+          console.error("멤시지 파싱 오류:", e);
         }
       });
       
@@ -246,6 +276,14 @@ const PaymentLimitWebSocket = () => {
       return newSet;
     });
   };
+  
+  const handleSalesTotalCardClick = (messageId) => {
+    setUnreadSalesTotal(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(messageId);
+      return newSet;
+    });
+  };
 
   return (
     <>
@@ -260,6 +298,12 @@ const PaymentLimitWebSocket = () => {
         paymentArr={filterDataByBrand(samePersonResponse)}
         unreadMessages={unreadSamePerson}
         onCardClick={handleSamePersonCardClick}
+      />
+      <SalesTotalChart 
+        title="매출 총합 모니터링" 
+        salesArr={filterDataByBrand(salesTotalData)}
+        unreadMessages={unreadSalesTotal}
+        onCardClick={handleSalesTotalCardClick}
       />
       
       {connected && <div className="text-xs text-gray-500 p-2 bg-gray-800 rounded mt-2 mb-4">
