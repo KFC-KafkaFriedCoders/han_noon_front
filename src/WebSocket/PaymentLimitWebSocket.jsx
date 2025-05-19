@@ -17,17 +17,37 @@ const PaymentLimitWebSocket = () => {
 
   const [paymentLimitresponse, setPaymentLimitResponse] = useState(() => {
     const savedData = localStorage.getItem("paymentLimitData");
-    return savedData ? JSON.parse(savedData).slice(0, MAX_MESSAGES) : [];
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // 기존 메시지에 ID가 없는 경우 추가
+      return parsed.map(msg => ({
+        ...msg,
+        id: msg.id || Date.now() + Math.random()
+      })).slice(0, MAX_MESSAGES);
+    }
+    return [];
   });
   
   const [samePersonResponse, setSamePersonResponse] = useState(() => {
     const savedData = localStorage.getItem("samePersonData");
-    return savedData ? JSON.parse(savedData).slice(0, MAX_MESSAGES) : [];
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      // 기존 메시지에 ID가 없는 경우 추가
+      return parsed.map(msg => ({
+        ...msg,
+        id: msg.id || Date.now() + Math.random()
+      })).slice(0, MAX_MESSAGES);
+    }
+    return [];
   });
   const [salesTotalData, setSalesTotalData] = useState(() => {
     const savedData = localStorage.getItem("salesTotalData");
     return savedData ? JSON.parse(savedData).slice(0, MAX_MESSAGES) : [];
   });
+  
+  // 읽지 않은 메시지를 추적하는 state
+  const [unreadPaymentLimit, setUnreadPaymentLimit] = useState(new Set());
+  const [unreadSamePerson, setUnreadSamePerson] = useState(new Set());
   
   const [connected, setConnected] = useState(false);
 
@@ -62,16 +82,28 @@ const PaymentLimitWebSocket = () => {
       stompClient.subscribe("/topic/payment-limit", (message) => {
         try {
           const data = JSON.parse(message.body);
+          // 고유 ID 추가 (시간 기반)
+          const messageId = Date.now() + Math.random();
+          const messageWithId = { ...data, id: messageId };
+          
           setPaymentLimitResponse((prev) => {
-            const newData = [data, ...prev].slice(0, MAX_MESSAGES);
+            const newData = [messageWithId, ...prev].slice(0, MAX_MESSAGES);
             return newData;
           });
+          
+          // 새 메시지를 읽지 않음으로 표시
+          setUnreadPaymentLimit(prev => new Set([...prev, messageId]));
         } catch (e) {
           console.error("메시지 파싱 오류:", e);
+          const messageId = Date.now() + Math.random();
+          const messageWithId = { body: message.body, id: messageId };
+          
           setPaymentLimitResponse((prev) => {
-            const newData = [message.body, ...prev].slice(0, MAX_MESSAGES);
+            const newData = [messageWithId, ...prev].slice(0, MAX_MESSAGES);
             return newData;
           });
+          
+          setUnreadPaymentLimit(prev => new Set([...prev, messageId]));
         }
       });
 
@@ -79,16 +111,29 @@ const PaymentLimitWebSocket = () => {
         try {
           const data = JSON.parse(message.body);
           console.log("수신된 데이터:", data);
+          
+          // 고유 ID 추가 (시간 기반)
+          const messageId = Date.now() + Math.random();
+          const messageWithId = { ...data, id: messageId };
+          
           setSamePersonResponse((prev) => {
-            const newData = [data, ...prev].slice(0, MAX_MESSAGES);
+            const newData = [messageWithId, ...prev].slice(0, MAX_MESSAGES);
             return newData;
           });
+          
+          // 새 메시지를 읽지 않음으로 표시
+          setUnreadSamePerson(prev => new Set([...prev, messageId]));
         } catch (e) {
           console.error("메시지 파싱 오류:", e);
+          const messageId = Date.now() + Math.random();
+          const messageWithId = { body: message.body, id: messageId };
+          
           setSamePersonResponse((prev) => {
-            const newData = [message.body, ...prev].slice(0, MAX_MESSAGES);
+            const newData = [messageWithId, ...prev].slice(0, MAX_MESSAGES);
             return newData;
           });
+          
+          setUnreadSamePerson(prev => new Set([...prev, messageId]));
         }
       });
 
@@ -185,10 +230,37 @@ const PaymentLimitWebSocket = () => {
     };
   }, []);
 
+  // 카드 클릭 핸들러
+  const handlePaymentLimitCardClick = (messageId) => {
+    setUnreadPaymentLimit(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(messageId);
+      return newSet;
+    });
+  };
+  
+  const handleSamePersonCardClick = (messageId) => {
+    setUnreadSamePerson(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(messageId);
+      return newSet;
+    });
+  };
+
   return (
     <>
-      <PaymentLimitChart title="이상 결제 탐지" paymentArr={filterDataByBrand(paymentLimitresponse)}/>
-      <SamePersonChart title="동일인 결제 탐지" paymentArr={filterDataByBrand(samePersonResponse)}/>
+      <PaymentLimitChart 
+        title="이상 결제 탐지" 
+        paymentArr={filterDataByBrand(paymentLimitresponse)}
+        unreadMessages={unreadPaymentLimit}
+        onCardClick={handlePaymentLimitCardClick}
+      />
+      <SamePersonChart 
+        title="동일인 결제 탐지" 
+        paymentArr={filterDataByBrand(samePersonResponse)}
+        unreadMessages={unreadSamePerson}
+        onCardClick={handleSamePersonCardClick}
+      />
       
       {connected && <div className="text-xs text-gray-500 p-2 bg-gray-800 rounded mt-2 mb-4">
         WebSocket 연결 상태: {connected ? "연결됨" : "연결 안됨"}
