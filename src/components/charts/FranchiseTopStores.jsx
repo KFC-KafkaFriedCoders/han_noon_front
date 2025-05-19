@@ -80,10 +80,27 @@ const FranchiseTopStores = ({
             })}
           </ul>
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">
-              Top Stores 데이터를 기다리는 중...
-            </p>
+          <div className="flex flex-col items-center justify-center h-full py-8">
+            <div className="bg-gray-700 p-6 rounded-lg text-center max-w-sm">
+              <div className="mb-4">
+                <div className="w-16 h-16 mx-auto bg-purple-500 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5"></path>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-white font-semibold mb-2">TOP 매장 데이터 준비중</h3>
+              <p className="text-gray-400 text-sm">
+                매장 순위 정보를 기다리는 중입니다...
+              </p>
+              <div className="mt-4">
+                <div className="flex space-x-1 justify-center">
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse-delay-200"></div>
+                  <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse-delay-400"></div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -58,10 +58,27 @@ const SalesTotalChart = ({
             })}
           </ul>
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">
-              매출 데이터를 기다리는 중...
-            </p>
+          <div className="flex flex-col items-center justify-center h-full py-8">
+            <div className="bg-gray-700 p-6 rounded-lg text-center max-w-sm">
+              <div className="mb-4">
+                <div className="w-16 h-16 mx-auto bg-blue-500 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4"></path>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-white font-semibold mb-2">매출 데이터 준비중</h3>
+              <p className="text-gray-400 text-sm">
+                매출 정보를 기다리는 중입니다...
+              </p>
+              <div className="mt-4">
+                <div className="flex space-x-1 justify-center">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse-delay-200"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse-delay-400"></div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

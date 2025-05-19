@@ -138,6 +138,15 @@ const PaymentLimitWebSocket = () => {
       setConnected(true);
       
       window.stompClient = stompClient;
+      
+      // 연결 성공 후 초기 브랜드 선택을 서버에 전송
+      if (selectedBrand) {
+        stompClient.publish({
+          destination: '/app/select-brand',
+          body: JSON.stringify({ brand: selectedBrand })
+        });
+        console.log("초기 브랜드 '", selectedBrand, "' 서버에 전송");
+      }
 
       stompClient.subscribe("/topic/payment-limit", (message) => {
         try {
@@ -384,6 +393,17 @@ const PaymentLimitWebSocket = () => {
       }
     };
   }, []);
+
+  // selectedBrand가 변경될 때 WebSocket이 연결되어 있으면 서버에 전송
+  useEffect(() => {
+    if (window.stompClient && window.stompClient.connected && selectedBrand) {
+      window.stompClient.publish({
+        destination: '/app/select-brand',
+        body: JSON.stringify({ brand: selectedBrand })
+      });
+      console.log("브랜드 변경 '", selectedBrand, "' 서버에 전송");
+    }
+  }, [selectedBrand]);
 
   const handlePaymentLimitCardClick = (messageId) => {
     setUnreadPaymentLimit(prev => {

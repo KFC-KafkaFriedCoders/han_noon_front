@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaTerminal } from "react-icons/fa";
 import { useBrand } from "../context/BrandContext";
 
@@ -28,21 +28,21 @@ const CommandInput = () => {
     "대한국밥"
   ];
 
-  const [inputSelectedBrand, setInputSelectedBrand] = useState("빽다방");
-  const { setSelectedBrand } = useBrand();
+  const { selectedBrand, setSelectedBrand } = useBrand();
+
+  // 초기값을 selectedBrand로 설정 (새로고침 시에도 동일한 값 유지)
+  const [inputSelectedBrand, setInputSelectedBrand] = useState(selectedBrand);
+
+  // selectedBrand가 변경될 때 inputSelectedBrand도 업데이트
+  useEffect(() => {
+    setInputSelectedBrand(selectedBrand);
+  }, [selectedBrand]);
 
   const handleExecute = () => {
     console.log("Executing commands for:", inputSelectedBrand);
     setSelectedBrand(inputSelectedBrand);
     
-    // 브랜드 선택이 변경되었음을 알림
-    // 여기서 WebSocket을 통해 서버에 브랜드 선택을 전송할 수 있음
-    if (window.stompClient && window.stompClient.connected) {
-      window.stompClient.publish({
-        destination: '/app/select-brand',
-        body: JSON.stringify({ brand: inputSelectedBrand })
-      });
-    }
+    // WebSocket 전송은 PaymentLimitWebSocket의 useEffect에서 처리하도록 두어 중복 제거
   };
 
   return (
