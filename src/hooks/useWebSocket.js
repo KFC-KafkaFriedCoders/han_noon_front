@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useBrand } from '../context/BrandContext';
 import webSocketService from '../services/webSocketService';
 import subscriptionManager from '../services/webSocketSubscriptionManager';
@@ -82,8 +82,8 @@ export const useWebSocket = () => {
   
   const [connected, setConnected] = useState(false);
 
-  // 시간순 누적 데이터 업데이트 함수
-  const updateSalesTimeSeries = (newSalesData) => {
+  // 시간순 누적 데이터 업데이트 함수 - useCallback으로 최적화
+  const updateSalesTimeSeries = useCallback((newSalesData) => {
     const brand = newSalesData.store_brand;
     if (!brand) return;
 
@@ -109,10 +109,10 @@ export const useWebSocket = () => {
         [brand]: newBrandData
       };
     });
-  };
+  }, []);
 
-  // WebSocket 콜백들 정의
-  const webSocketCallbacks = {
+  // WebSocket 콜백들 정의 - useMemo로 최적화하여 불필요한 재생성 방지
+  const webSocketCallbacks = useMemo(() => ({
     // Payment Limit 콜백들
     onPaymentLimitUpdate: (messageWithId) => {
       setPaymentLimitResponse(prev => 
@@ -196,7 +196,7 @@ export const useWebSocket = () => {
     onServerStatus: (status) => {
       console.log("서버 상태:", status);
     }
-  };
+  }), [updateSalesTimeSeries]);
 
   // WebSocket 연결 및 초기화
   useEffect(() => {
@@ -232,7 +232,7 @@ export const useWebSocket = () => {
       subscriptionManager.unsubscribeAll();
       webSocketService.disconnect();
     };
-  }, []); // 빈 의존성 배열로 한 번만 실행
+  }, [webSocketCallbacks, selectedBrand]); // 의존성 배열에 webSocketCallbacks 추가
 
   // 브랜드 변경 시 unread 필터링
   useEffect(() => {
@@ -294,80 +294,134 @@ export const useWebSocket = () => {
     }
   }, [selectedBrand]);
 
-  // 브랜드별 데이터 필터링 함수
-  const filterDataByBrand = (data) => {
-    if (!selectedBrand) return data;
-    return data.filter(item => item.store_brand === selectedBrand);
-  };
+  // 브랜드별 데이터 필터링 함수 - useMemo로 최적화
+  const paymentLimitData = useMemo(() => {
+    if (!selectedBrand) return paymentLimitresponse;
+    return paymentLimitresponse.filter(item => item.store_brand === selectedBrand);
+  }, [paymentLimitresponse, selectedBrand]);
+  
+  const samePersonData = useMemo(() => {
+    if (!selectedBrand) return samePersonResponse;
+    return samePersonResponse.filter(item => item.store_brand === selectedBrand);
+  }, [samePersonResponse, selectedBrand]);
+  
+  const filteredSalesTotalData = useMemo(() => {
+    if (!selectedBrand) return salesTotalData;
+    return salesTotalData.filter(item => item.store_brand === selectedBrand);
+  }, [salesTotalData, selectedBrand]);
+  
+  const filteredTopStoresData = useMemo(() => {
+    if (!selectedBrand) return topStoresData;
+    return topStoresData.filter(item => item.store_brand === selectedBrand);
+  }, [topStoresData, selectedBrand]);
 
-  // 필터링된 unread 메시지 가져오기
-  const getFilteredUnreadMessages = (unreadSet, dataArray) => {
-    if (!selectedBrand) return unreadSet;
+  // 필터링된 unread 메시지 가져오기 - useMemo로 최적화
+  const filteredUnreadPaymentLimit = useMemo(() => {
+    if (!selectedBrand) return unreadPaymentLimit;
     
     const filteredUnread = new Set();
-    unreadSet.forEach(messageId => {
-      const message = dataArray.find(item => item.id === messageId);
+    unreadPaymentLimit.forEach(messageId => {
+      const message = paymentLimitresponse.find(item => item.id === messageId);
       if (message && message.store_brand === selectedBrand) {
         filteredUnread.add(messageId);
       }
     });
     return filteredUnread;
-  };
+  }, [unreadPaymentLimit, paymentLimitresponse, selectedBrand]);
 
-  // 현재 선택된 브랜드의 시간순 데이터 가져오기
-  const getCurrentBrandTimeSeries = () => {
+  const filteredUnreadSamePerson = useMemo(() => {
+    if (!selectedBrand) return unreadSamePerson;
+    
+    const filteredUnread = new Set();
+    unreadSamePerson.forEach(messageId => {
+      const message = samePersonResponse.find(item => item.id === messageId);
+      if (message && message.store_brand === selectedBrand) {
+        filteredUnread.add(messageId);
+      }
+    });
+    return filteredUnread;
+  }, [unreadSamePerson, samePersonResponse, selectedBrand]);
+
+  const filteredUnreadSalesTotal = useMemo(() => {
+    if (!selectedBrand) return unreadSalesTotal;
+    
+    const filteredUnread = new Set();
+    unreadSalesTotal.forEach(messageId => {
+      const message = salesTotalData.find(item => item.id === messageId);
+      if (message && message.store_brand === selectedBrand) {
+        filteredUnread.add(messageId);
+      }
+    });
+    return filteredUnread;
+  }, [unreadSalesTotal, salesTotalData, selectedBrand]);
+
+  const filteredUnreadTopStores = useMemo(() => {
+    if (!selectedBrand) return unreadTopStores;
+    
+    const filteredUnread = new Set();
+    unreadTopStores.forEach(messageId => {
+      const message = topStoresData.find(item => item.id === messageId);
+      if (message && message.store_brand === selectedBrand) {
+        filteredUnread.add(messageId);
+      }
+    });
+    return filteredUnread;
+  }, [unreadTopStores, topStoresData, selectedBrand]);
+
+  // 현재 선택된 브랜드의 시간순 데이터 가져오기 - useMemo로 최적화
+  const currentBrandTimeSeries = useMemo(() => {
     if (!selectedBrand || !salesTimeSeriesData[selectedBrand]) {
       return [];
     }
     return salesTimeSeriesData[selectedBrand];
-  };
+  }, [salesTimeSeriesData, selectedBrand]);
 
-  // 클릭 핸들러들
-  const handlePaymentLimitCardClick = (messageId) => {
+  // 클릭 핸들러들 - useCallback으로 최적화
+  const handlePaymentLimitCardClick = useCallback((messageId) => {
     setUnreadPaymentLimit(prev => {
       const newSet = new Set(prev);
       newSet.delete(messageId);
       return newSet;
     });
-  };
+  }, []);
   
-  const handleSamePersonCardClick = (messageId) => {
+  const handleSamePersonCardClick = useCallback((messageId) => {
     setUnreadSamePerson(prev => {
       const newSet = new Set(prev);
       newSet.delete(messageId);
       return newSet;
     });
-  };
+  }, []);
   
-  const handleSalesTotalCardClick = (messageId) => {
+  const handleSalesTotalCardClick = useCallback((messageId) => {
     setUnreadSalesTotal(prev => {
       const newSet = new Set(prev);
       newSet.delete(messageId);
       return newSet;
     });
-  };
+  }, []);
   
-  const handleTopStoresCardClick = (messageId) => {
+  const handleTopStoresCardClick = useCallback((messageId) => {
     setUnreadTopStores(prev => {
       const newSet = new Set(prev);
       newSet.delete(messageId);
       return newSet;
     });
-  };
+  }, []);
 
   return {
     // 데이터
-    paymentLimitData: filterDataByBrand(paymentLimitresponse),
-    samePersonData: filterDataByBrand(samePersonResponse),
-    salesTotalData: filterDataByBrand(salesTotalData),
-    topStoresData: filterDataByBrand(topStoresData),
-    timeSeriesData: getCurrentBrandTimeSeries(),
+    paymentLimitData,
+    samePersonData,
+    salesTotalData: filteredSalesTotalData,
+    topStoresData: filteredTopStoresData,
+    timeSeriesData: currentBrandTimeSeries,
     
     // 읽지 않은 메시지
-    unreadPaymentLimit: getFilteredUnreadMessages(unreadPaymentLimit, paymentLimitresponse),
-    unreadSamePerson: getFilteredUnreadMessages(unreadSamePerson, samePersonResponse),
-    unreadSalesTotal: getFilteredUnreadMessages(unreadSalesTotal, salesTotalData),
-    unreadTopStores: getFilteredUnreadMessages(unreadTopStores, topStoresData),
+    unreadPaymentLimit: filteredUnreadPaymentLimit,
+    unreadSamePerson: filteredUnreadSamePerson,
+    unreadSalesTotal: filteredUnreadSalesTotal,
+    unreadTopStores: filteredUnreadTopStores,
     
     // 클릭 핸들러
     handlePaymentLimitCardClick,

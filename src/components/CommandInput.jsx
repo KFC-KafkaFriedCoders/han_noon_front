@@ -1,33 +1,53 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { FaTerminal } from "react-icons/fa";
 import { useBrand } from "../context/BrandContext";
 
-const CommandInput = () => {
-  const franchiseOptions = [
-    "빽다방",
-    "한신포차",
-    "돌배기집",
-    "롤링파스타",
-    "리춘시장",
-    "막이오름",
-    "미정국수0410",
-    "백스비어",
-    "백철판0410",
-    "본가",
-    "빽보이피자",
-    "새마을식당",
-    "성성식당",
-    "역전우동0410",
-    "연돈볼카츠",
-    "원조쌈밥집",
-    "인생설렁탕",
-    "제순식당",
-    "홍콩반점0410",
-    "홍콩분식",
-    "고투웍",
-    "대한국밥"
-  ];
+// 옵션 배열을 컴포넌트 외부로 이동하여 리렌더링에 영향을 받지 않도록 함
+const franchiseOptions = [
+  "빽다방",
+  "한신포차",
+  "돌배기집",
+  "롤링파스타",
+  "리춘시장",
+  "막이오름",
+  "미정국수0410",
+  "백스비어",
+  "백철판0410",
+  "본가",
+  "빽보이피자",
+  "새마을식당",
+  "성성식당",
+  "역전우동0410",
+  "연돈볼카츠",
+  "원조쌈밥집",
+  "인생설렁탕",
+  "제순식당",
+  "홍콩반점0410",
+  "홍콩분식",
+  "고투웍",
+  "대한국밥"
+];
 
+// 옵션 스타일을 상수로 정의
+const optionStyle = {
+  backgroundColor: "#1f2937",
+  color: "white"
+};
+
+// 메모이제이션된 옵션 컴포넌트
+const BrandOptions = memo(({ options }) => {
+  return options.map((option, idx) => (
+    <option
+      key={idx}
+      value={option}
+      style={optionStyle}
+    >
+      {option}
+    </option>
+  ));
+});
+
+const CommandInput = () => {
   const { selectedBrand, setSelectedBrand } = useBrand();
 
   // 초기값을 selectedBrand로 설정 (새로고침 시에도 동일한 값 유지)
@@ -38,12 +58,16 @@ const CommandInput = () => {
     setInputSelectedBrand(selectedBrand);
   }, [selectedBrand]);
 
-  const handleExecute = () => {
+  // 실행 핸들러 메모이제이션
+  const handleExecute = useCallback(() => {
     console.log("Executing commands for:", inputSelectedBrand);
     setSelectedBrand(inputSelectedBrand);
-    
-    // WebSocket 전송은 PaymentLimitWebSocket의 useEffect에서 처리하도록 두어 중복 제거
-  };
+  }, [inputSelectedBrand, setSelectedBrand]);
+
+  // onChange 핸들러 메모이제이션
+  const handleChange = useCallback((e) => {
+    setInputSelectedBrand(e.target.value);
+  }, []);
 
   return (
     <div className="my-4">
@@ -53,21 +77,10 @@ const CommandInput = () => {
         </div>
         <select
           value={inputSelectedBrand}
-          onChange={(e) => setInputSelectedBrand(e.target.value)}
+          onChange={handleChange}
           className="flex-grow bg-transparent border-none focus:outline-none text-gray-300"
         >
-          {franchiseOptions.map((option, idx) => (
-            <option
-              key={idx}
-              value={option}
-              style={{
-                backgroundColor: "#1f2937",
-                color: "white",
-              }}
-            >
-              {option}
-            </option>
-          ))}
+          <BrandOptions options={franchiseOptions} />
         </select>
         <button
           onClick={handleExecute}
@@ -80,4 +93,4 @@ const CommandInput = () => {
   );
 };
 
-export default CommandInput;
+export default memo(CommandInput);
