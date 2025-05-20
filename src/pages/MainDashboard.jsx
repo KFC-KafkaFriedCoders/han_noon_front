@@ -1,3 +1,4 @@
+import React from 'react';
 import Header from '../components/Header';
 import CommandInput from '../components/CommandInput';
 import MonitoringPanel from '../components/MonitoringPanel';

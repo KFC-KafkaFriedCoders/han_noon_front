@@ -1,5 +1,5 @@
 import React from 'react';
-import DataDisplay from './dashboard/DataDisplay';
+import DataDisplay from './DataDisplay';
 
 const MonitoringPanel = () => {
   return (
