@@ -3,7 +3,7 @@ name: Deploy React to EC2
 on:
   push:
     branches:
-      - main  
+      - main  # 필요에 따라 브랜치 이름 변경 가능
 
 jobs:
   deploy:
@@ -21,10 +21,10 @@ jobs:
 
       - name: Install dependencies and build
         run: |
-          npm install --no-audit --prefer-offline --legacy-peer-deps
+          npm install --legacy-peer-deps
           npm run build
         env:
-          CI: false  # React 빌드에서 경고를 오류로 처리하지 않도록 설정
+          CI: false
 
       - name: Check build output
         run: ls -la build/
@@ -33,48 +33,39 @@ jobs:
         run: |
           echo "${{ secrets.EC2_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
-        shell: bash
 
-      - name: Copy files to EC2
+      - name: Copy build files to EC2 (temp directory)
         run: |
-          # 복사할 디렉토리가 이미 존재하면 새로 생성하지 않음
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/ubuntu/react-app"
-          
-          # 빌드 파일 복사
           scp -o StrictHostKeyChecking=no -i ec2_key.pem -r build/* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/react-app/
 
-      - name: Update Nginx configuration (if needed)
+      - name: Move files to /var/www/react-app using sudo
         run: |
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            # Nginx 설정 파일에서 root 디렉토리 확인
-            if grep -q "/var/www/react-app" /etc/nginx/sites-available/react-app; then
-              echo "Updating Nginx root directory in config..."
-              # root 디렉토리 경로 변경
-              sudo sed -i 's|root /var/www/react-app;|root /home/ubuntu/react-app;|g' /etc/nginx/sites-available/react-app
-              echo "Nginx configuration updated."
-            else
-              echo "Current Nginx root configuration:"
-              grep "root" /etc/nginx/sites-available/react-app
-            fi
+            echo "Creating target directory..."
+            sudo mkdir -p /var/www/react-app
+
+            echo "Cleaning old files..."
+            sudo rm -rf /var/www/react-app/*
+
+            echo "Copying new files..."
+            sudo cp -r /home/ubuntu/react-app/* /var/www/react-app/
+
+            echo "Setting permissions..."
+            sudo chown -R www-data:www-data /var/www/react-app
           EOF
 
-      - name: Restart Nginx and verify deployment
+      - name: Restart Nginx and verify
         run: |
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            echo "Checking Nginx configuration..."
+            echo "Testing Nginx configuration..."
             sudo nginx -t
-            
+
             echo "Restarting Nginx..."
             sudo systemctl restart nginx
-            
-            echo "Verifying deployment..."
-            if [ -f "/home/ubuntu/react-app/index.html" ]; then
-              echo "Deployment successful: index.html found in /home/ubuntu/react-app"
-              ls -la /home/ubuntu/react-app
-            else
-              echo "WARNING: index.html not found in deployment directory!"
-              exit 1
-            fi
+
+            echo "Deployment complete!"
+            ls -la /var/www/react-app | grep index.html || echo "❗ index.html not found!"
           EOF
 
       - name: Cleanup
