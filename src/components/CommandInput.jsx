@@ -1,93 +1,110 @@
-import React, { useState, useEffect, memo, useCallback, useMemo } from "react";
-import { FaTerminal } from "react-icons/fa";
+import React, { useState, useEffect, memo, useCallback } from "react";
 import { useBrand } from "../context/BrandContext";
+import { IoIosArrowDown } from "react-icons/io";
 
-// 옵션 배열을 컴포넌트 외부로 이동하여 리렌더링에 영향을 받지 않도록 함
+// 옵션 배열 - 그룹화 없이 정렬만 해서 사용
 const franchiseOptions = [
   "빽다방",
   "한신포차",
   "돌배기집",
-  "롤링파스타",
-  "리춘시장",
-  "막이오름",
-  "미정국수0410",
-  "백스비어",
-  "백철판0410",
   "본가",
-  "빽보이피자",
   "새마을식당",
   "성성식당",
-  "역전우동0410",
   "연돈볼카츠",
   "원조쌈밥집",
   "인생설렁탕",
   "제순식당",
+  "대한국밥",
+  "리춘시장",
   "홍콩반점0410",
   "홍콩분식",
   "고투웍",
-  "대한국밥"
-];
-
-// 옵션 스타일을 상수로 정의
-const optionStyle = {
-  backgroundColor: "#1f2937",
-  color: "white"
-};
-
-// 메모이제이션된 옵션 컴포넌트
-const BrandOptions = memo(({ options }) => {
-  return options.map((option, idx) => (
-    <option
-      key={idx}
-      value={option}
-      style={optionStyle}
-    >
-      {option}
-    </option>
-  ));
-});
+  "막이오름",
+  "미정국수0410",
+  "역전우동0410",
+  "백스비어",
+  "백철판0410",
+  "빽보이피자",
+  "롤링파스타",
+].sort();
 
 const CommandInput = () => {
   const { selectedBrand, setSelectedBrand } = useBrand();
-
-  // 초기값을 selectedBrand로 설정 (새로고침 시에도 동일한 값 유지)
   const [inputSelectedBrand, setInputSelectedBrand] = useState(selectedBrand);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // selectedBrand가 변경될 때 inputSelectedBrand도 업데이트
   useEffect(() => {
     setInputSelectedBrand(selectedBrand);
   }, [selectedBrand]);
 
-  // 실행 핸들러 메모이제이션
-  const handleExecute = useCallback(() => {
-    console.log("Executing commands for:", inputSelectedBrand);
-    setSelectedBrand(inputSelectedBrand);
-  }, [inputSelectedBrand, setSelectedBrand]);
+  // 브랜드 변경 함수
+  const handleBrandSelect = useCallback((brand) => {
+    setInputSelectedBrand(brand);
+    setSelectedBrand(brand); // 바로 적용
+    setIsDropdownOpen(false);
+    setSearchTerm('');
+  }, [setSelectedBrand]);
 
-  // onChange 핸들러 메모이제이션
-  const handleChange = useCallback((e) => {
-    setInputSelectedBrand(e.target.value);
+  // 검색 화면에서 이스케이프 키 입력 처리
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === 'Escape') {
+      setIsDropdownOpen(false);
+      setSearchTerm('');
+    }
   }, []);
+
+  // 검색어 필터링된 메뉴 아이템
+  const filteredOptions = searchTerm.trim() 
+    ? franchiseOptions.filter(option => 
+        option.toLowerCase().includes(searchTerm.toLowerCase()))
+    : franchiseOptions;
 
   return (
     <div className="my-4">
-      <div className="flex items-center mb-2 bg-gray-900 rounded p-2 group">
-        <div className="text-gray-400 mr-2">
-          <FaTerminal />
+      <div className="flex flex-col bg-gray-800 rounded-xl p-3 shadow-lg">
+        <div className="relative">
+          <div 
+            className="flex items-center justify-between bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          >
+            <div className="text-white font-medium">{inputSelectedBrand}</div>
+            <IoIosArrowDown className={`text-gray-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+          </div>
+
+          {isDropdownOpen && (
+            <div className="absolute mt-1 w-full bg-gray-700 rounded-lg shadow-xl z-10 max-h-96 overflow-y-auto animate-fadeInUp">
+              <div className="p-2 sticky top-0 bg-gray-700 border-b border-gray-600">
+                <input
+                  type="text"
+                  placeholder="검색..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="w-full p-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+
+              <div className="p-2">
+                {filteredOptions.length > 0 ? (
+                  filteredOptions.map((option, idx) => (
+                    <div 
+                      key={idx}
+                      className={`p-2 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors ${inputSelectedBrand === option ? 'bg-blue-800' : ''}`}
+                      onClick={() => handleBrandSelect(option)}
+                    >
+                      <div className="text-white">{option}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-4 text-gray-400 text-center">검색 결과가 없습니다.</div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-        <select
-          value={inputSelectedBrand}
-          onChange={handleChange}
-          className="flex-grow bg-transparent border-none focus:outline-none text-gray-300"
-        >
-          <BrandOptions options={franchiseOptions} />
-        </select>
-        <button
-          onClick={handleExecute}
-          className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-medium"
-        >
-          Execute
-        </button>
       </div>
     </div>
   );
