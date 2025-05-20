@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
+  darkMode: 'class', // 'class' 기반 다크 모드 사용
   theme: {
     extend: {
       animation: {
