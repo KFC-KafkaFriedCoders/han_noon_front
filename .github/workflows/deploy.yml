@@ -37,13 +37,44 @@ jobs:
 
       - name: Copy files to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p ${{ secrets.EC2_PATH }}"
-          scp -o StrictHostKeyChecking=no -i ec2_key.pem -r build/* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_PATH }}
+          # 복사할 디렉토리가 이미 존재하면 새로 생성하지 않음
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /home/ubuntu/react-app"
+          
+          # 빌드 파일 복사
+          scp -o StrictHostKeyChecking=no -i ec2_key.pem -r build/* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ubuntu/react-app/
 
-      - name: Restart Nginx 
+      - name: Update Nginx configuration (if needed)
         run: |
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # Nginx 설정 파일에서 root 디렉토리 확인
+            if grep -q "/var/www/react-app" /etc/nginx/sites-available/react-app; then
+              echo "Updating Nginx root directory in config..."
+              # root 디렉토리 경로 변경
+              sudo sed -i 's|root /var/www/react-app;|root /home/ubuntu/react-app;|g' /etc/nginx/sites-available/react-app
+              echo "Nginx configuration updated."
+            else
+              echo "Current Nginx root configuration:"
+              grep "root" /etc/nginx/sites-available/react-app
+            fi
+          EOF
+
+      - name: Restart Nginx and verify deployment
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            echo "Checking Nginx configuration..."
+            sudo nginx -t
+            
+            echo "Restarting Nginx..."
             sudo systemctl restart nginx
+            
+            echo "Verifying deployment..."
+            if [ -f "/home/ubuntu/react-app/index.html" ]; then
+              echo "Deployment successful: index.html found in /home/ubuntu/react-app"
+              ls -la /home/ubuntu/react-app
+            else
+              echo "WARNING: index.html not found in deployment directory!"
+              exit 1
+            fi
           EOF
 
       - name: Cleanup
