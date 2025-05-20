@@ -34,7 +34,7 @@ const SalesTotalChart = ({
 
     return (
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+        <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }} isAnimationActive={false}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.5} />
           <XAxis 
             dataKey="time" 
@@ -73,7 +73,7 @@ const SalesTotalChart = ({
             dot={{ fill: '#10B981', r: 4, strokeWidth: 1, stroke: '#065F46' }}  
             activeDot={{ r: 6, fill: '#10B981', stroke: '#065F46', strokeWidth: 2 }}  
             connectNulls={false}
-            animationDuration={1000}
+            isAnimationActive={false} // 애니메이션 비활성화
           />
         </LineChart>
       </ResponsiveContainer>

@@ -23,7 +23,7 @@ const FranchiseTopStores = ({
       title={title}
       color="purple"
     >
-      <div className="h-120 overflow-y-auto">
+      <div className="h-120 overflow-y-auto custom-scrollbar p-1">
         {topStoresArr.length > 0 ? (
           <ul className="space-y-3">
             {topStoresArr.map((msg, index) => {

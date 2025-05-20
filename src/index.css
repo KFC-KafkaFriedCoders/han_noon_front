@@ -48,3 +48,44 @@
   transform: translateY(-10px);
   transition: opacity 250ms, transform 250ms;
 }
+
+/* 스크롤바 스타일 사용자 정의 */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Firefox용 */
+  scrollbar-color: rgba(107, 114, 128, 0.5) transparent; /* Firefox용 스크롤바 색상 */
+}
+
+/* Webkit 브라우저(크롬, 사파리 등)에 대한 스타일 */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* 스크롤바 너비 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* 트랙 배경 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(107, 114, 128, 0.5); /* 스크롤바 색상 */
+  border-radius: 20px; /* 둥근한 모서리 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.7); /* 호버 시 스크롤바 색상 */
+}
+
+/* 다크 모드에서의 스크롤바 색상 */
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(156, 163, 175, 0.5) rgba(17, 24, 39, 0.2); /* Firefox용 스크롤바 색상 */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.2); /* 다크 모드 트랙 배경 */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5); /* 다크 모드 스크롤바 색상 */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.7); /* 다크 모드 호버 시 스크롤바 색상 */
+}

@@ -22,7 +22,7 @@ const PaymentLimitChart = ({
         )
       }
     >
-      <div className="h-80 overflow-y-auto">
+      <div className="h-80 overflow-y-auto custom-scrollbar p-1">
         {paymentArr.length > 0 ? (
           <ul className="space-y-2">
             {paymentArr.map((msg, index) => {
