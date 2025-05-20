@@ -2,19 +2,16 @@ import React, { memo } from 'react';
 import { useBrand } from '../../context/BrandContext';
 import { useWebSocket } from '../../hooks/useWebSocket';
 
-// 차트 컴포넌트 가져오기
 import PaymentLimitChart from '../charts/PaymentLimitChart';
 import SamePersonChart from '../charts/SamPersonChart';
 import SalesTotalChart from '../charts/SalesTotalChart';
 import FranchiseTopStores from '../charts/FranchiseTopStores';
 
-// 메모이제이션된 차트 컴포넌트들
 const MemoizedPaymentLimitChart = memo(PaymentLimitChart);
 const MemoizedSamePersonChart = memo(SamePersonChart);
 const MemoizedSalesTotalChart = memo(SalesTotalChart);
 const MemoizedFranchiseTopStores = memo(FranchiseTopStores);
 
-// 연결 상태 표시 컴포넌트
 const ConnectionStatus = memo(({ connected, selectedBrand }) => {
   if (!connected) return null;
   

@@ -6,9 +6,6 @@ import { MESSAGE_ID_PREFIX, STORAGE_KEYS, DATA_LIMITS } from '../utils/constants
 
 const { MAX_MESSAGES, MAX_TIME_SERIES } = DATA_LIMITS;
 
-/**
- * WebSocket 데이터와 연결 상태를 관리하는 커스텀 훅
- */
 export const useWebSocket = () => {
   const { selectedBrand } = useBrand();
   
@@ -232,7 +229,7 @@ export const useWebSocket = () => {
       subscriptionManager.unsubscribeAll();
       webSocketService.disconnect();
     };
-  }, [webSocketCallbacks, selectedBrand]); // 의존성 배열에 webSocketCallbacks 추가
+  }, [webSocketCallbacks, selectedBrand]);
 
   // 브랜드 변경 시 unread 필터링
   useEffect(() => {
