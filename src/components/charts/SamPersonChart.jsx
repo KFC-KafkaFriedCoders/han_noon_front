@@ -57,10 +57,27 @@ const SamePersonChart = ({
             })}
           </ul>
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">
-              수신된 데이터가 없습니다.
-            </p>
+          <div className="flex flex-col items-center justify-center h-full py-8">
+            <div className="bg-gray-800 p-6 rounded-lg text-center max-w-sm">
+              <div className="mb-4">
+                <div className="w-16 h-16 mx-auto bg-green-500 rounded-full flex items-center justify-center">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-white font-semibold mb-2">동일인 결제 데이터 준비중</h3>
+              <p className="text-gray-400 text-sm">
+                동일인 결제 탐지 정보를 기다리는 중입니다...
+              </p>
+              <div className="mt-4">
+                <div className="flex space-x-1 justify-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

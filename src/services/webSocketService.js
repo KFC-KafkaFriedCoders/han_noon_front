@@ -21,7 +21,7 @@ class WebSocketService {
   }
 
   // WebSocket 연결
-  connect(url = "http://localhost:8080/payment-limit-ws") {
+  connect(url = "http://3.13.184.246:8080/payment-limit-ws") {
     if (this.client && this.connected) {
       console.log("WebSocket 이미 연결됨");
       return;

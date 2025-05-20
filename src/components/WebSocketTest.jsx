@@ -11,7 +11,7 @@ const WebSocketTest = () => {
   useEffect(() => {
     // WebSocket 연결 테스트
     const stompClient = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS('http://3.13.184.246:8080/ws'),
       debug: (str) => {
         console.log('STOMP DEBUG:', str);
         setMessages(prev => [...prev, `DEBUG: ${str}`]);
