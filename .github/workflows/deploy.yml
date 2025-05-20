@@ -3,7 +3,7 @@ name: Deploy React to EC2
 on:
   push:
     branches:
-      - main  # 필요시 다른 브랜치명으로 변경
+      - main  # 필요에 따라 브랜치 이름 변경
 
 jobs:
   deploy:
@@ -34,12 +34,18 @@ jobs:
           echo "${{ secrets.EC2_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
 
+      - name: Prepare target directory with sudo and change ownership
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            sudo mkdir -p /var/www/react-app
+            sudo chown -R $USER:$USER /var/www/react-app
+          EOF
+
       - name: Copy build files directly to Nginx directory
         run: |
-          ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p /var/www/react-app"
           scp -o StrictHostKeyChecking=no -i ec2_key.pem -r build/* ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/var/www/react-app/
 
-      - name: Restart Nginx and verify
+      - name: Restart Nginx and verify deployment
         run: |
           ssh -o StrictHostKeyChecking=no -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             echo "Testing Nginx configuration..."
