@@ -47,6 +47,13 @@ export const useNonResponseData = (selectedBrand) => {
   
   // 클릭 핸들러
   const handleNonResponseCardClick = useCallback((messageId) => {
+    // 'all'이면 모든 알림 제거
+    if (messageId === 'all') {
+      setUnreadNonResponse(new Set());
+      return;
+    }
+    
+    // 특정 알림 제거
     setUnreadNonResponse(prev => {
       const newSet = new Set(prev);
       newSet.delete(messageId);

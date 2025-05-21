@@ -16,6 +16,15 @@ const SamePersonChart = ({
       rightComponent={
         unreadMessages.size > 0 && (
           <div className="flex items-center">
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                onCardClick('all');
+              }} 
+              className="mr-2 text-xs text-gray-300 hover:text-white transition-colors"
+            >
+              전체 읽음
+            </button>
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
               {unreadMessages.size}
             </span>

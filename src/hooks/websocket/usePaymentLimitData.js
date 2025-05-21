@@ -51,6 +51,13 @@ export const usePaymentLimitData = (selectedBrand) => {
   
   // 클릭 핸들러
   const handlePaymentLimitCardClick = useCallback((messageId) => {
+    // 'all'이면 모든 알림 제거
+    if (messageId === 'all') {
+      setUnreadPaymentLimit(new Set());
+      return;
+    }
+    
+    // 특정 알림 제거
     setUnreadPaymentLimit(prev => {
       const newSet = new Set(prev);
       newSet.delete(messageId);
