@@ -57,7 +57,7 @@ const NonResponseChart = ({
                         <span className="text-gray-400 text-xs ml-2">(ID: {store.store_id})</span>
                       </div>
                       <span className="text-yellow-400 font-bold">
-                        {store.inactive_time}분
+                        {store.inactive_time}초
                       </span>
                     </div>
                     <div className="text-xs text-gray-300">
