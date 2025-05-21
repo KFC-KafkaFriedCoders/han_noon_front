@@ -73,20 +73,26 @@ const FranchiseTopStores = ({
                                   storeIndex === 1 ? 'text-gray-300' : 
                                   'text-amber-400'
                                 }`}>
-                                  TOP {store.rank}
+                                  TOP {store.rank || storeIndex + 1}
                                 </span>
                               </div>
                               <span className="text-green-400 font-mono font-bold text-lg">
-                                ₩{store.total_sales.toLocaleString()}
+                                {typeof store.total_sales === 'number' 
+                                  ? `₩${new Intl.NumberFormat('ko-KR').format(store.total_sales)}` 
+                                  : (typeof store.sales === 'number' 
+                                    ? `₩${new Intl.NumberFormat('ko-KR').format(store.sales)}` 
+                                    : '데이터 없음')}
                               </span>
                             </div>
                             <div className="bg-gray-800/50 p-2 rounded-md">
                               <div className="text-white font-semibold text-base mb-1">
                                 {store.store_name}
                               </div>
-                              <div className="text-gray-300 text-sm">
-                                <span className="inline-block mr-1">📍</span> {store.store_address}
-                              </div>
+                              {store.store_address && (
+                                <div className="text-gray-300 text-sm">
+                                  <span className="inline-block mr-1">📍</span> {store.store_address}
+                                </div>
+                              )}
                             </div>
                           </div>
                         ))}

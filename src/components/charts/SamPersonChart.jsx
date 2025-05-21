@@ -1,6 +1,7 @@
 import React from "react";
 import ChartPanel from '../common/ui/ChartPanel';
 import LoadingState from '../common/ui/LoadingState';
+import AlertCardItem from '../common/ui/cards/AlertCardItem';
 
 const SamePersonChart = ({
   title,
@@ -30,38 +31,16 @@ const SamePersonChart = ({
               const isUnread = unreadMessages.has(msg.id);
               
               return (
-                <li
+                <AlertCardItem
                   key={msg.id || index}
-                  className={`relative bg-gray-800 p-3 rounded-lg text-sm cursor-pointer hover:bg-gray-700 transition-all duration-200 ${
-                    isUnread ? 'border-l-4 border-red-500 shadow-lg' : ''
-                  }`}
-                  onClick={() => onCardClick(msg.id)}
-                >
-                  {isUnread && (
-                    <div className="absolute top-2 right-2">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white animate-pulse">
-                        NEW
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className={`${isUnread ? 'pr-16' : ''} text-white`}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-orange-400 font-medium">동일인 알림</span>
-                      <span className="text-xs text-gray-400">
-                        {msg.store_brand || ''}
-                      </span>
-                    </div>
-                    <div className="bg-gray-700 p-2 rounded-md mb-2">
-                      {messageText}
-                    </div>
-                    {msg.server_received_time && (
-                      <div className="text-xs text-gray-400 text-right">
-                        {new Date(msg.server_received_time).toLocaleString()}
-                      </div>
-                    )}
-                  </div>
-                </li>
+                  item={msg}
+                  isUnread={isUnread}
+                  messageText={messageText}
+                  accentColor="orange"
+                  timeField="server_received_time"
+                  titleText="동일인 알림"
+                  onClick={onCardClick}
+                />
               );
             })}
           </ul>
