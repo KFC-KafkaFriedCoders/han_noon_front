@@ -196,6 +196,25 @@ class WebSocketHandlers {
       console.error("Top Stores 업데이트 처리 오류:", error);
     }
   }
+  
+  // 비응답 매장 메시지 핸들러
+  handleNonResponse(message, callbacks) {
+    try {
+      const data = this.parseMessage(message);
+      const messageId = data.id || this.generateMessageId();
+      const messageWithId = { ...data, id: messageId };
+
+      if (callbacks.onUpdate) {
+        callbacks.onUpdate(messageWithId);
+      }
+      
+      if (callbacks.onUnread) {
+        callbacks.onUnread(messageId);
+      }
+    } catch (error) {
+      console.error("비응답 매장 메시지 처리 오류:", error);
+    }
+  }
 
   // 서버 상태 핸들러
   handleServerStatus(message, callbacks) {

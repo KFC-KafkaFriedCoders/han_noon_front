@@ -98,6 +98,14 @@ class WebSocketSubscriptionManager {
         id: "top-stores-data-update"
       },
       {
+        topic: "/topic/non-response",
+        handler: (message) => webSocketHandlers.handleNonResponse(message, {
+          onUpdate: callbacks.onNonResponseUpdate,
+          onUnread: callbacks.onNonResponseUnread
+        }),
+        id: "non-response"
+      },
+      {
         topic: "/topic/server-status",
         handler: (message) => webSocketHandlers.handleServerStatus(message, {
           onServerStatus: callbacks.onServerStatus

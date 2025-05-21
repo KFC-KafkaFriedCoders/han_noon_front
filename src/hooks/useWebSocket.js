@@ -71,11 +71,24 @@ export const useWebSocket = () => {
     return [];
   });
   
+  const [nonResponseData, setNonResponseData] = useState(() => {
+    const savedData = localStorage.getItem(STORAGE_KEYS.NON_RESPONSE_DATA);
+    if (savedData) {
+      const parsed = JSON.parse(savedData);
+      return parsed.map(msg => ({
+        ...msg,
+        id: msg.id || `${MESSAGE_ID_PREFIX.EXISTING}-${Date.now()}-${Math.random()}`
+      })).slice(0, MAX_MESSAGES);
+    }
+    return [];
+  });
+  
   // 읽지 않은 메시지 상태들
   const [unreadPaymentLimit, setUnreadPaymentLimit] = useState(new Set());
   const [unreadSamePerson, setUnreadSamePerson] = useState(new Set());
   const [unreadSalesTotal, setUnreadSalesTotal] = useState(new Set());
   const [unreadTopStores, setUnreadTopStores] = useState(new Set());
+  const [unreadNonResponse, setUnreadNonResponse] = useState(new Set());
   
   const [connected, setConnected] = useState(false);
 
@@ -189,6 +202,29 @@ export const useWebSocket = () => {
       setTopStoresData([]);
     },
 
+    // Non Response 콜백들
+    onNonResponseUpdate: (messageWithId) => {
+      setNonResponseData(prev => {
+        // 기존 데이터에 동일한 store_id와 store_brand가 있는지 확인
+        const existingIndex = prev.findIndex(
+          item => item.store_id === messageWithId.store_id && 
+                 item.store_brand === messageWithId.store_brand
+        );
+        
+        // 기존 데이터가 있으면 업데이트, 없으면 추가
+        if (existingIndex >= 0) {
+          const newData = [...prev];
+          newData[existingIndex] = messageWithId;
+          return newData;
+        } else {
+          return [messageWithId, ...prev].slice(0, MAX_MESSAGES);
+        }
+      });
+    },
+    onNonResponseUnread: (messageId) => {
+      setUnreadNonResponse(prev => new Set([...prev, messageId]));
+    },
+
     // Server Status 콜백
     onServerStatus: (status) => {
       console.log("서버 상태:", status);
@@ -259,8 +295,11 @@ export const useWebSocket = () => {
       setUnreadTopStores(prev => 
         filterUnreadByBrand(prev, topStoresData)
       );
+      setUnreadNonResponse(prev => 
+        filterUnreadByBrand(prev, nonResponseData)
+      );
     }
-  }, [selectedBrand, paymentLimitresponse, samePersonResponse, salesTotalData, topStoresData]);
+  }, [selectedBrand, paymentLimitresponse, samePersonResponse, salesTotalData, topStoresData, nonResponseData]);
 
   // localStorage 저장 effects
   useEffect(() => {
@@ -282,6 +321,10 @@ export const useWebSocket = () => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.TOP_STORES_DATA, JSON.stringify(topStoresData));
   }, [topStoresData]);
+  
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.NON_RESPONSE_DATA, JSON.stringify(nonResponseData));
+  }, [nonResponseData]);
 
   // 브랜드 변경 시 WebSocket에 전송
   useEffect(() => {
@@ -311,6 +354,11 @@ export const useWebSocket = () => {
     if (!selectedBrand) return topStoresData;
     return topStoresData.filter(item => item.store_brand === selectedBrand);
   }, [topStoresData, selectedBrand]);
+  
+  const filteredNonResponseData = useMemo(() => {
+    if (!selectedBrand) return nonResponseData;
+    return nonResponseData.filter(item => item.store_brand === selectedBrand);
+  }, [nonResponseData, selectedBrand]);
 
   // 필터링된 unread 메시지 가져오기 - useMemo로 최적화
   const filteredUnreadPaymentLimit = useMemo(() => {
@@ -364,6 +412,19 @@ export const useWebSocket = () => {
     });
     return filteredUnread;
   }, [unreadTopStores, topStoresData, selectedBrand]);
+  
+  const filteredUnreadNonResponse = useMemo(() => {
+    if (!selectedBrand) return unreadNonResponse;
+    
+    const filteredUnread = new Set();
+    unreadNonResponse.forEach(messageId => {
+      const message = nonResponseData.find(item => item.id === messageId);
+      if (message && message.store_brand === selectedBrand) {
+        filteredUnread.add(messageId);
+      }
+    });
+    return filteredUnread;
+  }, [unreadNonResponse, nonResponseData, selectedBrand]);
 
   // 현재 선택된 브랜드의 시간순 데이터 가져오기 - useMemo로 최적화
   const currentBrandTimeSeries = useMemo(() => {
@@ -405,6 +466,14 @@ export const useWebSocket = () => {
       return newSet;
     });
   }, []);
+  
+  const handleNonResponseCardClick = useCallback((messageId) => {
+    setUnreadNonResponse(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(messageId);
+      return newSet;
+    });
+  }, []);
 
   return {
     // 데이터
@@ -412,6 +481,7 @@ export const useWebSocket = () => {
     samePersonData,
     salesTotalData: filteredSalesTotalData,
     topStoresData: filteredTopStoresData,
+    nonResponseData: filteredNonResponseData,
     timeSeriesData: currentBrandTimeSeries,
     
     // 읽지 않은 메시지
@@ -419,12 +489,14 @@ export const useWebSocket = () => {
     unreadSamePerson: filteredUnreadSamePerson,
     unreadSalesTotal: filteredUnreadSalesTotal,
     unreadTopStores: filteredUnreadTopStores,
+    unreadNonResponse: filteredUnreadNonResponse,
     
     // 클릭 핸들러
     handlePaymentLimitCardClick,
     handleSamePersonCardClick,
     handleSalesTotalCardClick,
     handleTopStoresCardClick,
+    handleNonResponseCardClick,
     
     // 연결 상태
     connected

@@ -6,22 +6,13 @@ import PaymentLimitChart from '../charts/PaymentLimitChart';
 import SamePersonChart from '../charts/SamPersonChart';
 import SalesTotalChart from '../charts/SalesTotalChart';
 import FranchiseTopStores from '../charts/FranchiseTopStores';
+import NonResponseChart from '../charts/NonResponseChart';
 
 const MemoizedPaymentLimitChart = memo(PaymentLimitChart);
 const MemoizedSamePersonChart = memo(SamePersonChart);
 const MemoizedSalesTotalChart = memo(SalesTotalChart);
 const MemoizedFranchiseTopStores = memo(FranchiseTopStores);
-
-const ConnectionStatus = memo(({ connected, selectedBrand }) => {
-  if (!connected) return null;
-  
-  return (
-    <div className="text-xs text-gray-500 p-2 bg-gray-800 rounded mt-2 mb-4">
-      WebSocket 연결 상태: {connected ? "연결됨" : "연결 안됨"}
-      {selectedBrand && <span className="ml-2">선택된 브랜드: {selectedBrand}</span>}
-    </div>
-  );
-});
+const MemoizedNonResponseChart = memo(NonResponseChart);
 
 const DataDisplay = () => {
   const { selectedBrand } = useBrand();
@@ -30,15 +21,18 @@ const DataDisplay = () => {
     samePersonData,
     salesTotalData,
     topStoresData,
+    nonResponseData,
     timeSeriesData,
     unreadPaymentLimit,
     unreadSamePerson,
     unreadSalesTotal,
     unreadTopStores,
+    unreadNonResponse,
     handlePaymentLimitCardClick,
     handleSamePersonCardClick,
     handleSalesTotalCardClick,
     handleTopStoresCardClick,
+    handleNonResponseCardClick,
     connected
   } = useWebSocket();
 
@@ -67,7 +61,12 @@ const DataDisplay = () => {
         topStoresArr={topStoresData}
         onCardClick={handleTopStoresCardClick}
       />
-      <ConnectionStatus connected={connected} selectedBrand={selectedBrand} />
+      <MemoizedNonResponseChart
+        title="비응답 매장 알림" 
+        nonResponseArr={nonResponseData}
+        unreadMessages={unreadNonResponse}
+        onCardClick={handleNonResponseCardClick}
+      />
     </>
   );
 };
