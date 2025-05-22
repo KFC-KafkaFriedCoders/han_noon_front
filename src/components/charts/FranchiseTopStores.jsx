@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from '../../context/theme/ThemeContext';
 import ChartPanel from '../common/ui/ChartPanel';
 import LoadingState from '../common/ui/LoadingState';
-
 const FranchiseTopStores = ({
   title,
   topStoresArr = [],
@@ -19,6 +18,40 @@ const FranchiseTopStores = ({
       }, 100);
     }
   }, [topStoresArr]);
+
+  // 메달 아이콘과 색상 반환
+  const getMedalIcon = (index) => {
+    switch(index) {
+      case 0:
+        return {
+          icon: '🥇',
+          bgColor: 'bg-yellow-500/30',
+          textColor: 'text-yellow-400',
+          borderColor: 'border-yellow-400'
+        };
+      case 1:
+        return {
+          icon: '🥈',
+          bgColor: 'bg-gray-400/30', 
+          textColor: 'text-gray-300',
+          borderColor: 'border-gray-400'
+        };
+      case 2:
+        return {
+          icon: '🥉',
+          bgColor: 'bg-amber-600/30',
+          textColor: 'text-amber-400',
+          borderColor: 'border-amber-400'
+        };
+      default:
+        return {
+          icon: `${index + 1}`,
+          bgColor: 'bg-gray-500/30',
+          textColor: 'text-gray-400',
+          borderColor: 'border-gray-500'
+        };
+    }
+  };
 
   return (
     <ChartPanel 
@@ -63,59 +96,71 @@ const FranchiseTopStores = ({
                     
                     {msg.top_stores && msg.top_stores.length > 0 ? (
                       <div className="space-y-4">
-                        {msg.top_stores.slice(0, 3).map((store, storeIndex) => (
-                          <div 
-                            key={store.store_id || storeIndex} 
-                            className={`p-3 rounded-lg transition-all duration-300 ${
-                              isDarkMode 
-                                ? 'bg-gray-700 hover:bg-gray-600' 
-                                : 'bg-gray-50 hover:bg-gray-100'
-                            }`}
-                            style={{ transitionDelay: `${storeIndex * 100}ms` }}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${
-                                  storeIndex === 0 ? 'bg-yellow-500/20 text-yellow-500' : 
-                                  storeIndex === 1 ? 'bg-gray-400/20 text-gray-500' : 
-                                  'bg-amber-600/20 text-amber-500'
-                                }`}>
-                                  <span className="font-bold">{storeIndex + 1}</span>
+                        {msg.top_stores.slice(0, 3).map((store, storeIndex) => {
+                          const medal = getMedalIcon(storeIndex);
+                          
+                          return (
+                            <div 
+                              key={store.store_id || storeIndex} 
+                              className={`p-3 rounded-lg transition-all duration-300 border-2 ${
+                                isDarkMode 
+                                  ? 'bg-gray-700 hover:bg-gray-600' 
+                                  : 'bg-gray-50 hover:bg-gray-100'
+                              } ${medal.borderColor}`}
+                              style={{ transitionDelay: `${storeIndex * 100}ms` }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center">
+                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-3 ${medal.bgColor} border-2 ${medal.borderColor}`}>
+                                    <span className="text-2xl">
+                                      {medal.icon}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className={`font-bold text-xl ${medal.textColor}`}>
+                                      TOP {storeIndex + 1}
+                                    </span>
+                                    <div className={`text-sm transition-colors duration-300 ${
+                                      isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                    }`}>
+
+                                    </div>
+                                  </div>
                                 </div>
-                                <span className={`font-bold text-lg ${
-                                  storeIndex === 0 ? 'text-yellow-500' : 
-                                  storeIndex === 1 ? 'text-gray-500' : 
-                                  'text-amber-500'
-                                }`}>
-                                  TOP {store.rank || storeIndex + 1}
-                                </span>
+                                <div className="text-right">
+                                  <div className="text-green-500 font-mono font-bold text-lg">
+                                    {typeof store.total_sales === 'number' 
+                                      ? `₩${new Intl.NumberFormat('ko-KR').format(store.total_sales)}` 
+                                      : (typeof store.sales === 'number' 
+                                        ? `₩${new Intl.NumberFormat('ko-KR').format(store.sales)}` 
+                                        : '데이터 없음')}
+                                  </div>
+                                  <div className={`text-xs transition-colors duration-300 ${
+                                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                                  }`}>
+                                    매출액
+                                  </div>
+                                </div>
                               </div>
-                              <span className="text-green-500 font-mono font-bold text-lg">
-                                {typeof store.total_sales === 'number' 
-                                  ? `₩${new Intl.NumberFormat('ko-KR').format(store.total_sales)}` 
-                                  : (typeof store.sales === 'number' 
-                                    ? `₩${new Intl.NumberFormat('ko-KR').format(store.sales)}` 
-                                    : '데이터 없음')}
-                              </span>
-                            </div>
-                            <div className={`p-2 rounded-md transition-colors duration-300 ${
-                              isDarkMode ? 'bg-gray-800/50' : 'bg-white/50'
-                            }`}>
-                              <div className={`font-semibold text-base mb-1 transition-colors duration-300 ${
-                                isDarkMode ? 'text-white' : 'text-gray-900'
+                              <div className={`p-2 rounded-md transition-colors duration-300 ${
+                                isDarkMode ? 'bg-gray-800/50' : 'bg-white/50'
                               }`}>
-                                {store.store_name}
-                              </div>
-                              {store.store_address && (
-                                <div className={`text-sm transition-colors duration-300 ${
-                                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                <div className={`font-semibold text-base mb-1 transition-colors duration-300 ${
+                                  isDarkMode ? 'text-white' : 'text-gray-900'
                                 }`}>
-                                  <span className="inline-block mr-1">📍</span> {store.store_address}
+                                  {store.store_name}
                                 </div>
-                              )}
+                                {store.store_address && (
+                                  <div className={`text-sm transition-colors duration-300 ${
+                                    isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                  }`}>
+                                    <span className="inline-block mr-1">📍</span> {store.store_address}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
                       <div className={`text-center py-4 transition-colors duration-300 ${
