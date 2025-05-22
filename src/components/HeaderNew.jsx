@@ -20,12 +20,17 @@ const HeaderNew = () => {
     samePersonData,
     salesTotalData,
     salesMinuteData,
+    minuteTimeSeriesData, // 새로 추가된 1분당 매출 시계열 데이터
     topStoresData,
     nonResponseData,
     timeSeriesData
   } = useWebSocket();
   
   const handleBookClick = () => {
+    // 기존 네비게이션 기능은 주석 처리
+    // navigate('/monitor');
+    
+    // CSV 다운로드 기능 실행
     handleCSVDownload();
   };
 
@@ -77,15 +82,30 @@ const HeaderNew = () => {
       });
     }
 
-    // 시계열 데이터 추가
+    // 매출 총합 시계열 데이터 추가
     if (timeSeriesData && timeSeriesData.length > 0) {
       dataSets.push({
-        title: '시간별 매출 추이',
+        title: '시간별 매출 총합 추이',
         data: timeSeriesData.map(item => ({
           store_brand: selectedBrand,
           time: item.time,
           total_sales: item.totalSales,
           display_time: item.displayTime
+        }))
+      });
+    }
+
+    // 1분당 매출 시계열 데이터 추가 (새로 추가!)
+    if (minuteTimeSeriesData && minuteTimeSeriesData.length > 0) {
+      dataSets.push({
+        title: '1분당 매출 추이 (최근 5분)',
+        data: minuteTimeSeriesData.map(item => ({
+          store_brand: selectedBrand,
+          time: item.time,
+          total_sales: item.totalSales,
+          store_count: item.storeCount,
+          display_time: item.displayTime,
+          timestamp: item.timestamp
         }))
       });
     }

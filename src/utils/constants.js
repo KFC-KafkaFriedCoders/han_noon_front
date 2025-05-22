@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   SALES_TOTAL_DATA: 'sales_total_data',
   SALES_TIME_SERIES_DATA: 'sales_time_series_data',
   SALES_MINUTE_DATA: 'sales_minute_data',
+  SALES_MINUTE_TIME_SERIES_DATA: 'sales_minute_time_series_data', // 새로 추가
   TOP_STORES_DATA: 'top_stores_data',
   NON_RESPONSE_DATA: 'non_response_data',
   SELECTED_BRAND: 'selected_brand',

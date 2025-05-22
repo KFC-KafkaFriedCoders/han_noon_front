@@ -70,7 +70,8 @@ export const useWebSocket = () => {
     handleSalesTotalCardClick: salesTotal.handleSalesTotalCardClick,
     
     // Sales Minute 데이터
-    salesMinuteData: salesMinute.salesMinuteData,
+    salesMinuteData: salesMinute.salesMinuteData, // 표시용 (최신 1개)
+    minuteTimeSeriesData: salesMinute.minuteTimeSeriesData, // 그래프용 (최근 5개)
     handleSalesMinuteCardClick: salesMinute.handleSalesMinuteCardClick,
     
     // Top Stores 데이터

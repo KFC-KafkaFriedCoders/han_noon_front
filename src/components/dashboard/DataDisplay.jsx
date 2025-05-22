@@ -23,6 +23,7 @@ const DataDisplay = () => {
     samePersonData,
     salesTotalData,
     salesMinuteData,
+    minuteTimeSeriesData, // 새로 추가된 그래프용 데이터
     topStoresData,
     nonResponseData,
     timeSeriesData,
@@ -61,6 +62,7 @@ const DataDisplay = () => {
       <MemoizedSalesMinuteChart 
         title="1분당 매출 모니터링" 
         salesMinuteArr={salesMinuteData}
+        minuteTimeSeriesData={minuteTimeSeriesData} // 그래프용 데이터 전달
         onCardClick={handleSalesMinuteCardClick}
       />
       <MemoizedNonResponseChart
