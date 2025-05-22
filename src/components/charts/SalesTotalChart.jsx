@@ -120,10 +120,6 @@ const SalesTotalChart = ({
                 </DataCard>
               )}
             </div>
-            
-            <div className="text-xs text-gray-400 mt-2 text-right">
-              마지막 업데이트: {new Date(salesArr[0]?.update_time || salesArr[0]?.server_received_time).toLocaleString()}
-            </div>
           </div>
         ) : (
           <LoadingState 
