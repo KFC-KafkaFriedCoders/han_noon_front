@@ -50,8 +50,8 @@ const SalesMinuteChart = ({
           </ul>
         ) : (
           <LoadingState 
-            title="분별 매출 데이터 준비중"
-            message="분별 매출 정보를 기다리는 중입니다..."
+            title="1분당 매출 데이터 준비중"
+            message="1분당 매출 정보를 기다리는 중입니다..."
             color="teal"
             icon={
               <svg className="w-8 h-8 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

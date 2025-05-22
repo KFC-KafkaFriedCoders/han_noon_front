@@ -26,11 +26,6 @@ const NonResponseCardItem = ({
         <div className="text-xs text-gray-300">
           <span>마지막 활동: {store.last_activity}</span>
         </div>
-        {store.server_received_time && (
-          <div className="text-xs text-gray-400 text-right mt-1">
-            수신: {store.server_received_time}
-          </div>
-        )}
       </div>
     </li>
   );
