@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../../../context/theme/ThemeContext';
 
 const LoadingState = ({ 
   title = '데이터 준비중', 
@@ -6,6 +7,8 @@ const LoadingState = ({
   icon, 
   color = 'blue' 
 }) => {
+  const { isDarkMode } = useTheme();
+  
   const getIconClass = () => {
     switch(color) {
       case 'green': return 'text-green-500';
@@ -13,8 +16,21 @@ const LoadingState = ({
       case 'orange': return 'text-orange-500';
       case 'yellow': return 'text-yellow-500';
       case 'purple': return 'text-purple-500';
+      case 'teal': return 'text-teal-500';
       default: return 'text-gray-500';
     }
+  };
+
+  const getBgClass = () => {
+    const bgColorMap = {
+      green: isDarkMode ? 'bg-green-900/30' : 'bg-green-100',
+      blue: isDarkMode ? 'bg-blue-900/30' : 'bg-blue-100',
+      orange: isDarkMode ? 'bg-orange-900/30' : 'bg-orange-100',
+      yellow: isDarkMode ? 'bg-yellow-900/30' : 'bg-yellow-100',
+      purple: isDarkMode ? 'bg-purple-900/30' : 'bg-purple-100',
+      teal: isDarkMode ? 'bg-teal-900/30' : 'bg-teal-100',
+    };
+    return bgColorMap[color] || (isDarkMode ? 'bg-gray-900/30' : 'bg-gray-100');
   };
 
   const defaultIcon = (
@@ -23,58 +39,33 @@ const LoadingState = ({
     </svg>
   );
 
+  const renderDots = (color) => (
+    <>
+      <div className={`w-2 h-2 bg-${color}-500 rounded-full animate-bounce`} style={{ animationDelay: '0ms' }}></div>
+      <div className={`w-2 h-2 bg-${color}-500 rounded-full animate-bounce`} style={{ animationDelay: '150ms' }}></div>
+      <div className={`w-2 h-2 bg-${color}-500 rounded-full animate-bounce`} style={{ animationDelay: '300ms' }}></div>
+    </>
+  );
+
   return (
-    <div className="flex flex-col items-center justify-center py-6 bg-gray-800 rounded-lg">
-      <div className={`p-3 rounded-full mb-3 ${color === 'green' ? 'bg-green-900/30' : color === 'blue' ? 'bg-blue-900/30' : color === 'orange' ? 'bg-orange-900/30' : color === 'yellow' ? 'bg-yellow-900/30' : color === 'purple' ? 'bg-purple-900/30' : 'bg-gray-900/30'}`}>
+    <div className={`flex flex-col items-center justify-center py-6 rounded-lg transition-colors duration-300 ${
+      isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
+    }`}>
+      <div className={`p-3 rounded-full mb-3 ${getBgClass()}`}>
         {icon || defaultIcon}
       </div>
-      <h3 className="text-white font-semibold mb-1">{title}</h3>
-      <p className="text-gray-400 text-xs mb-3">
+      <h3 className={`font-semibold mb-1 transition-colors duration-300 ${
+        isDarkMode ? 'text-white' : 'text-gray-900'
+      }`}>
+        {title}
+      </h3>
+      <p className={`text-xs mb-3 transition-colors duration-300 ${
+        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+      }`}>
         {message}
       </p>
       <div className="flex space-x-2 justify-center mt-2">
-        {color === 'green' && (
-          <>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </>
-        )}
-        {color === 'blue' && (
-          <>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </>
-        )}
-        {color === 'orange' && (
-          <>
-            <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </>
-        )}
-        {color === 'yellow' && (
-          <>
-            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </>
-        )}
-        {color === 'purple' && (
-          <>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </>
-        )}
-        {color !== 'green' && color !== 'blue' && color !== 'orange' && color !== 'yellow' && color !== 'purple' && (
-          <>
-            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-            <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-          </>
-        )}
+        {renderDots(color)}
       </div>
     </div>
   );

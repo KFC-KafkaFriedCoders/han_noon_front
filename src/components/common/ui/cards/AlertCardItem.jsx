@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../../../../context/theme/ThemeContext';
 
 const AlertCardItem = ({
   item,
@@ -8,19 +9,31 @@ const AlertCardItem = ({
   titleText = '정보',
   onClick
 }) => {
+  const { isDarkMode } = useTheme();
+  
   return (
     <li
-      className="relative bg-gray-800 p-3 rounded-lg text-sm cursor-pointer hover:bg-gray-700 transition-all duration-200"
+      className={`relative p-3 rounded-lg text-sm cursor-pointer transition-all duration-200 ${
+        isDarkMode 
+          ? 'bg-gray-800 hover:bg-gray-700' 
+          : 'bg-white hover:bg-gray-50 border border-gray-200'
+      }`}
       onClick={() => onClick && onClick(item.id)}
     >
-      <div className="text-white">
+      <div className={`transition-colors duration-300 ${
+        isDarkMode ? 'text-white' : 'text-gray-900'
+      }`}>
         <div className="flex justify-between items-center mb-2">
-          <span className={`text-${accentColor}-400 font-medium`}>{titleText}</span>
-          <span className="text-xs text-gray-400">
+          <span className={`text-${accentColor}-500 font-medium`}>{titleText}</span>
+          <span className={`text-xs transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-400' : 'text-gray-600'
+          }`}>
             {item.store_brand || ''}
           </span>
         </div>
-        <div className="bg-gray-700 p-2 rounded-md mb-2">
+        <div className={`p-2 rounded-md mb-2 transition-colors duration-300 ${
+          isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
+        }`}>
           {messageText}
         </div>
       </div>

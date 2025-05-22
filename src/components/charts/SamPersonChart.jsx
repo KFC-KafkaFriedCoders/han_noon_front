@@ -1,4 +1,5 @@
 import React from "react";
+import { useTheme } from '../../context/theme/ThemeContext';
 import ChartPanel from '../common/ui/ChartPanel';
 import LoadingState from '../common/ui/LoadingState';
 import AlertCardItem from '../common/ui/cards/AlertCardItem';
@@ -8,6 +9,8 @@ const SamePersonChart = ({
   paymentArr = [],
   onCardClick = () => {},
 }) => {
+  const { isDarkMode } = useTheme();
+  
   return (
     <ChartPanel 
       title={title}

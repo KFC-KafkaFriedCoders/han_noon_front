@@ -1,5 +1,6 @@
 import React from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTheme } from '../../context/theme/ThemeContext';
 import ChartPanel from '../common/ui/ChartPanel';
 import DataCard from '../common/ui/DataCard';
 import LoadingState from '../common/ui/LoadingState';
@@ -11,6 +12,7 @@ const SalesTotalChart = ({
   timeSeriesData = [],
   onCardClick = () => {},
 }) => {
+  const { isDarkMode } = useTheme();
   const chartData = generateChartData(timeSeriesData);
   const yAxisDomain = calculateYAxisDomain(chartData);
   const stats = calculateStats(chartData);
@@ -35,11 +37,15 @@ const SalesTotalChart = ({
     return (
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }} isAnimationActive={false}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.5} />
+          <CartesianGrid 
+            strokeDasharray="3 3" 
+            stroke={isDarkMode ? "#374151" : "#e5e7eb"} 
+            opacity={0.5} 
+          />
           <XAxis 
             dataKey="time" 
-            tick={{ fontSize: 10, fill: '#9CA3AF' }} 
-            stroke="#6B7280"
+            tick={{ fontSize: 10, fill: isDarkMode ? '#9CA3AF' : '#6B7280' }} 
+            stroke={isDarkMode ? "#6B7280" : "#9CA3AF"}
             interval={0}
             angle={-45}
             textAnchor="end"
@@ -48,12 +54,17 @@ const SalesTotalChart = ({
           <YAxis 
             domain={yAxisDomain}
             tickFormatter={formatAxisValue}
-            tick={{ fontSize: 10, fill: '#9CA3AF' }}
-            stroke="#6B7280"
+            tick={{ fontSize: 10, fill: isDarkMode ? '#9CA3AF' : '#6B7280' }}
+            stroke={isDarkMode ? "#6B7280" : "#9CA3AF"}
             width={40}
           />
           <Tooltip 
-            {...defaultTooltipStyle}
+            contentStyle={{
+              backgroundColor: isDarkMode ? '#1f2937' : '#ffffff',
+              border: `1px solid ${isDarkMode ? '#374151' : '#e5e7eb'}`,
+              borderRadius: '6px',
+              color: isDarkMode ? '#ffffff' : '#000000'
+            }}
             formatter={(value, name) => [
               `₩${value.toLocaleString()}`,
               '총 매출'
@@ -73,7 +84,7 @@ const SalesTotalChart = ({
             dot={{ fill: '#10B981', r: 4, strokeWidth: 1, stroke: '#065F46' }}  
             activeDot={{ r: 6, fill: '#10B981', stroke: '#065F46', strokeWidth: 2 }}  
             connectNulls={false}
-            isAnimationActive={false} // 애니메이션 비활성화
+            isAnimationActive={false}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -86,7 +97,9 @@ const SalesTotalChart = ({
       color="blue"
       rightComponent={
         chartData.length > 1 && (
-          <div className="text-xs text-gray-500 font-mono">
+          <div className={`text-xs font-mono transition-colors duration-300 ${
+            isDarkMode ? 'text-gray-500' : 'text-gray-600'
+          }`}>
             최신: ₩{chartData[chartData.length - 1]?.totalSales?.toLocaleString() || 0}
           </div>
         )
@@ -94,7 +107,9 @@ const SalesTotalChart = ({
     >
       <div className="mb-4">
         {salesArr.length > 0 ? (
-          <div className="bg-gray-800 rounded-lg p-4 shadow-lg transform transition-all duration-300">
+          <div className={`rounded-lg p-4 shadow-lg transform transition-all duration-300 ${
+            isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
+          }`}>
             <div className="grid grid-cols-2 gap-3">
               <DataCard 
                 label="현재 매출 총합" 
@@ -130,11 +145,17 @@ const SalesTotalChart = ({
         )}
       </div>
 
-      <div className="border-t border-gray-700 pt-3">
+      <div className={`border-t pt-3 transition-colors duration-300 ${
+        isDarkMode ? 'border-gray-700' : 'border-gray-300'
+      }`}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center">
             <div className="w-2 h-2 rounded-full mr-2 bg-emerald-500"></div>
-            <h4 className="text-xs font-medium text-gray-400">시간별 매출 추이 (최근 {timeSeriesData.length}개)</h4>
+            <h4 className={`text-xs font-medium transition-colors duration-300 ${
+              isDarkMode ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              시간별 매출 추이 (최근 {timeSeriesData.length}개)
+            </h4>
           </div>
         </div>
         

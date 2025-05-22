@@ -1,5 +1,6 @@
 import React, { useState, useEffect, memo, useCallback } from "react";
 import { useBrand } from "../context/BrandContext";
+import { useTheme } from "../context/theme/ThemeContext";
 import { IoIosArrowDown } from "react-icons/io";
 
 // 옵션 배열 - 그룹화 없이 정렬만 해서 사용
@@ -30,6 +31,7 @@ const franchiseOptions = [
 
 const CommandInput = () => {
   const { selectedBrand, setSelectedBrand } = useBrand();
+  const { isDarkMode } = useTheme();
   const [inputSelectedBrand, setInputSelectedBrand] = useState(selectedBrand);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,26 +65,52 @@ const CommandInput = () => {
 
   return (
     <div className="my-4">
-      <div className="flex flex-col bg-gray-800 rounded-xl p-3 shadow-lg">
+      <div className={`flex flex-col p-3 rounded-xl shadow-lg transition-colors duration-300 ${
+        isDarkMode 
+          ? 'bg-gray-800 border border-gray-700' 
+          : 'bg-white border border-gray-200'
+      }`}>
         <div className="relative">
           <div 
-            className="flex items-center justify-between bg-gray-700 p-3 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors"
+            className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors duration-300 ${
+              isDarkMode 
+                ? 'bg-gray-700 hover:bg-gray-600' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <div className="text-white font-medium">{inputSelectedBrand}</div>
-            <IoIosArrowDown className={`text-gray-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            <div className={`font-medium transition-colors duration-300 ${
+              isDarkMode ? 'text-white' : 'text-gray-900'
+            }`}>
+              {inputSelectedBrand}
+            </div>
+            <IoIosArrowDown className={`transition-all duration-300 ${
+              isDropdownOpen ? 'rotate-180' : ''
+            } ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
           </div>
 
           {isDropdownOpen && (
-            <div className="absolute mt-1 w-full bg-gray-700 rounded-lg shadow-xl z-10 max-h-96 overflow-y-auto animate-fadeInUp">
-              <div className="p-2 sticky top-0 bg-gray-700 border-b border-gray-600">
+            <div className={`absolute mt-1 w-full rounded-lg shadow-xl z-10 max-h-96 overflow-y-auto animate-fadeInUp border ${
+              isDarkMode 
+                ? 'bg-gray-700 border-gray-600' 
+                : 'bg-white border-gray-200'
+            }`}>
+              <div className={`p-2 sticky top-0 border-b ${
+                isDarkMode 
+                  ? 'bg-gray-700 border-gray-600' 
+                  : 'bg-white border-gray-200'
+              }`}>
                 <input
                   type="text"
                   placeholder="검색..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="w-full p-2 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300 ${
+                    isDarkMode 
+                      ? 'bg-gray-800 text-white border border-gray-600' 
+                      : 'bg-gray-50 text-gray-900 border border-gray-300'
+                  }`}
                   autoFocus
                 />
               </div>
@@ -92,14 +120,26 @@ const CommandInput = () => {
                   filteredOptions.map((option, idx) => (
                     <div 
                       key={idx}
-                      className={`p-2 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors ${inputSelectedBrand === option ? 'bg-blue-800' : ''}`}
+                      className={`p-2 rounded-lg cursor-pointer transition-colors duration-200 ${
+                        inputSelectedBrand === option 
+                          ? (isDarkMode ? 'bg-blue-800' : 'bg-blue-100')
+                          : (isDarkMode ? 'hover:bg-gray-600' : 'hover:bg-gray-100')
+                      }`}
                       onClick={() => handleBrandSelect(option)}
                     >
-                      <div className="text-white">{option}</div>
+                      <div className={`transition-colors duration-300 ${
+                        isDarkMode ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {option}
+                      </div>
                     </div>
                   ))
                 ) : (
-                  <div className="p-4 text-gray-400 text-center">검색 결과가 없습니다.</div>
+                  <div className={`p-4 text-center transition-colors duration-300 ${
+                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    검색 결과가 없습니다.
+                  </div>
                 )}
               </div>
             </div>

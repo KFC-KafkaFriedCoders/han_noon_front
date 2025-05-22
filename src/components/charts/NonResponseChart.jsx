@@ -1,4 +1,5 @@
 import React from "react";
+import { useTheme } from '../../context/theme/ThemeContext';
 import ChartPanel from '../common/ui/ChartPanel';
 import LoadingState from '../common/ui/LoadingState';
 import NonResponseCardItem from '../common/ui/cards/NonResponseCardItem';
@@ -8,6 +9,8 @@ const NonResponseChart = ({
   nonResponseArr = [],
   onCardClick = () => {},
 }) => {
+  const { isDarkMode } = useTheme();
+  
   return (
     <ChartPanel 
       title={title}

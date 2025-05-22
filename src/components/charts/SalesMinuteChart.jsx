@@ -1,3 +1,5 @@
+import React from 'react';
+import { useTheme } from '../../context/theme/ThemeContext';
 import ChartPanel from '../common/ui/ChartPanel';
 import LoadingState from '../common/ui/LoadingState';
 
@@ -6,6 +8,8 @@ const SalesMinuteChart = ({
   salesMinuteArr = [],
   onCardClick = () => {},
 }) => {
+  const { isDarkMode } = useTheme();
+  
   return (
     <ChartPanel 
       title={title}
@@ -20,16 +24,31 @@ const SalesMinuteChart = ({
               return (
                 <li
                   key={data.id || index}
-                  className="relative bg-gray-800 p-3 rounded-lg text-sm cursor-pointer hover:bg-gray-700 transition-all duration-200"
+                  className={`relative p-3 rounded-lg text-sm cursor-pointer transition-all duration-200 ${
+                    isDarkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700' 
+                      : 'bg-white hover:bg-gray-50 border border-gray-200'
+                  }`}
                   onClick={() => onCardClick(data.id)}
                 >
-                  <div className="text-white">
+                  <div className={`transition-colors duration-300 ${
+                    isDarkMode ? 'text-white' : 'text-gray-900'
+                  }`}>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-xs text-gray-400">
+                      <span className={`text-xs transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
                         {data.store_brand || ''}
                       </span>
+                      <span className={`text-xs transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-500' : 'text-gray-500'
+                      }`}>
+                        {data.time || new Date().toLocaleTimeString()}
+                      </span>
                     </div>
-                    <div className="bg-gray-700 p-2 rounded-md mb-2">
+                    <div className={`p-2 rounded-md mb-2 transition-colors duration-300 ${
+                      isDarkMode ? 'bg-gray-700' : 'bg-gray-100'
+                    }`}>
                       {messageText}
                     </div>
                   </div>

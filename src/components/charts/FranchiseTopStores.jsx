@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useTheme } from '../../context/theme/ThemeContext';
 import ChartPanel from '../common/ui/ChartPanel';
 import LoadingState from '../common/ui/LoadingState';
 
@@ -7,6 +8,7 @@ const FranchiseTopStores = ({
   topStoresArr = [],
   onCardClick = () => {},
 }) => {
+  const { isDarkMode } = useTheme();
   const [animateItems, setAnimateItems] = useState([]);
   
   useEffect(() => {
@@ -35,18 +37,26 @@ const FranchiseTopStores = ({
               return (
                 <li
                   key={msg.id || index}
-                  className="bg-gray-800 p-4 rounded-lg cursor-pointer hover:bg-gray-700 transition-all duration-300 shadow-md"
+                  className={`p-4 rounded-lg cursor-pointer transition-all duration-300 shadow-md ${
+                    isDarkMode 
+                      ? 'bg-gray-800 hover:bg-gray-700' 
+                      : 'bg-white hover:bg-gray-50 border border-gray-200'
+                  }`}
                   onClick={() => onCardClick(msg.id)}
                 >
                   <div className="space-y-3">
-                    <div className="flex justify-between items-center border-b border-gray-600 pb-2">
+                    <div className={`flex justify-between items-center border-b pb-2 transition-colors duration-300 ${
+                      isDarkMode ? 'border-gray-600' : 'border-gray-300'
+                    }`}>
                       <div className="flex items-center">
                         <div className="w-2 h-2 rounded-full mr-2 bg-purple-500"></div>
-                        <span className="font-semibold text-purple-300 text-lg">
+                        <span className="font-semibold text-purple-500 text-lg">
                           {storeBrand}
                         </span>
                       </div>
-                      <span className="text-xs text-gray-400">
+                      <span className={`text-xs transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
                         {new Date(msg.timestamp || msg.server_received_time).toLocaleString()}
                       </span>
                     </div>
@@ -56,27 +66,31 @@ const FranchiseTopStores = ({
                         {msg.top_stores.slice(0, 3).map((store, storeIndex) => (
                           <div 
                             key={store.store_id || storeIndex} 
-                            className="bg-gray-700 p-3 rounded-lg hover:bg-gray-600 transition-all duration-300"
+                            className={`p-3 rounded-lg transition-all duration-300 ${
+                              isDarkMode 
+                                ? 'bg-gray-700 hover:bg-gray-600' 
+                                : 'bg-gray-50 hover:bg-gray-100'
+                            }`}
                             style={{ transitionDelay: `${storeIndex * 100}ms` }}
                           >
                             <div className="flex items-center justify-between mb-2">
                               <div className="flex items-center">
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 ${
-                                  storeIndex === 0 ? 'bg-yellow-500/20 text-yellow-300' : 
-                                  storeIndex === 1 ? 'bg-gray-400/20 text-gray-300' : 
-                                  'bg-amber-600/20 text-amber-400'
+                                  storeIndex === 0 ? 'bg-yellow-500/20 text-yellow-500' : 
+                                  storeIndex === 1 ? 'bg-gray-400/20 text-gray-500' : 
+                                  'bg-amber-600/20 text-amber-500'
                                 }`}>
                                   <span className="font-bold">{storeIndex + 1}</span>
                                 </div>
                                 <span className={`font-bold text-lg ${
-                                  storeIndex === 0 ? 'text-yellow-400' : 
-                                  storeIndex === 1 ? 'text-gray-300' : 
-                                  'text-amber-400'
+                                  storeIndex === 0 ? 'text-yellow-500' : 
+                                  storeIndex === 1 ? 'text-gray-500' : 
+                                  'text-amber-500'
                                 }`}>
                                   TOP {store.rank || storeIndex + 1}
                                 </span>
                               </div>
-                              <span className="text-green-400 font-mono font-bold text-lg">
+                              <span className="text-green-500 font-mono font-bold text-lg">
                                 {typeof store.total_sales === 'number' 
                                   ? `₩${new Intl.NumberFormat('ko-KR').format(store.total_sales)}` 
                                   : (typeof store.sales === 'number' 
@@ -84,12 +98,18 @@ const FranchiseTopStores = ({
                                     : '데이터 없음')}
                               </span>
                             </div>
-                            <div className="bg-gray-800/50 p-2 rounded-md">
-                              <div className="text-white font-semibold text-base mb-1">
+                            <div className={`p-2 rounded-md transition-colors duration-300 ${
+                              isDarkMode ? 'bg-gray-800/50' : 'bg-white/50'
+                            }`}>
+                              <div className={`font-semibold text-base mb-1 transition-colors duration-300 ${
+                                isDarkMode ? 'text-white' : 'text-gray-900'
+                              }`}>
                                 {store.store_name}
                               </div>
                               {store.store_address && (
-                                <div className="text-gray-300 text-sm">
+                                <div className={`text-sm transition-colors duration-300 ${
+                                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
+                                }`}>
                                   <span className="inline-block mr-1">📍</span> {store.store_address}
                                 </div>
                               )}
@@ -98,7 +118,9 @@ const FranchiseTopStores = ({
                         ))}
                       </div>
                     ) : (
-                      <div className="text-gray-500 text-center py-4">
+                      <div className={`text-center py-4 transition-colors duration-300 ${
+                        isDarkMode ? 'text-gray-500' : 'text-gray-600'
+                      }`}>
                         매장 정보가 없습니다.
                       </div>
                     )}
