@@ -3,6 +3,7 @@ import { useBrand } from '../context/BrandContext';
 import { usePaymentLimitData } from './websocket/usePaymentLimitData';
 import { useSamePersonData } from './websocket/useSamePersonData';
 import { useSalesTotalData } from './websocket/useSalesTotalData';
+import { useSalesMinuteData } from './websocket/useSalesMinuteData';
 import { useTopStoresData } from './websocket/useTopStoresData';
 import { useNonResponseData } from './websocket/useNonResponseData';
 import { useWebSocketConnection } from './websocket/useWebSocketConnection';
@@ -14,6 +15,7 @@ export const useWebSocket = () => {
   const paymentLimit = usePaymentLimitData(selectedBrand);
   const samePerson = useSamePersonData(selectedBrand);
   const salesTotal = useSalesTotalData(selectedBrand);
+  const salesMinute = useSalesMinuteData(selectedBrand);
   const topStores = useTopStoresData(selectedBrand);
   const nonResponse = useNonResponseData(selectedBrand);
   
@@ -27,6 +29,9 @@ export const useWebSocket = () => {
     
     // Sales Total 콜백들
     ...salesTotal.callbacks,
+    
+    // Sales Minute 콜백들
+    ...salesMinute.callbacks,
     
     // Top Stores 콜백들
     ...topStores.callbacks,
@@ -42,6 +47,7 @@ export const useWebSocket = () => {
     paymentLimit.callbacks,
     samePerson.callbacks,
     salesTotal.callbacks,
+    salesMinute.callbacks,
     topStores.callbacks,
     nonResponse.callbacks
   ]);
@@ -62,6 +68,10 @@ export const useWebSocket = () => {
     salesTotalData: salesTotal.salesTotalData,
     timeSeriesData: salesTotal.timeSeriesData,
     handleSalesTotalCardClick: salesTotal.handleSalesTotalCardClick,
+    
+    // Sales Minute 데이터
+    salesMinuteData: salesMinute.salesMinuteData,
+    handleSalesMinuteCardClick: salesMinute.handleSalesMinuteCardClick,
     
     // Top Stores 데이터
     topStoresData: topStores.topStoresData,

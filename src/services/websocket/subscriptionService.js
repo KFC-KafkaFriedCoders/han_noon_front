@@ -79,10 +79,6 @@ class SubscriptionService {
         if (this.callbacks.onPaymentLimitUpdate) {
           this.callbacks.onPaymentLimitUpdate(messageWithId);
         }
-        
-        if (this.callbacks.onPaymentLimitUnread) {
-          this.callbacks.onPaymentLimitUnread(messageWithId.id);
-        }
       } catch (error) {
         console.error("이상 결제 메시지 처리 오류:", error);
       }
@@ -97,10 +93,6 @@ class SubscriptionService {
         
         if (this.callbacks.onSamePersonUpdate) {
           this.callbacks.onSamePersonUpdate(messageWithId);
-        }
-        
-        if (this.callbacks.onSamePersonUnread) {
-          this.callbacks.onSamePersonUnread(messageWithId.id);
         }
       } catch (error) {
         console.error("동일인 결제 메시지 처리 오류:", error);
@@ -135,16 +127,27 @@ class SubscriptionService {
             this.callbacks.onSalesTotalUpdate(messageWithId);
           }
           
-          if (this.callbacks.onSalesTotalUnread) {
-            this.callbacks.onSalesTotalUnread(messageWithId.id);
-          }
-          
           if (this.callbacks.onTimeSeriesUpdate) {
             this.callbacks.onTimeSeriesUpdate(messageWithId);
           }
         }
       } catch (error) {
         console.error("매출 총합 메시지 처리 오류:", error);
+      }
+    });
+
+    // 분별 매출 구독
+    this.subscribe(SOCKET.ENDPOINTS.SALES_MINUTE, (message) => {
+      try {
+        const data = JSON.parse(message.body);
+        
+        const messageWithId = messageService.addIdToMessage(data);
+        
+        if (this.callbacks.onSalesMinuteUpdate) {
+          this.callbacks.onSalesMinuteUpdate(messageWithId);
+        }
+      } catch (error) {
+        console.error("분별 매출 메시지 처리 오류:", error);
       }
     });
 
@@ -168,10 +171,6 @@ class SubscriptionService {
           if (this.callbacks.onTopStoresUpdate) {
             this.callbacks.onTopStoresUpdate(messageWithId);
           }
-          
-          if (this.callbacks.onTopStoresUnread) {
-            this.callbacks.onTopStoresUnread(messageWithId.id);
-          }
         }
       } catch (error) {
         console.error("매출 상위 매장 메시지 처리 오류:", error);
@@ -187,10 +186,6 @@ class SubscriptionService {
         
         if (this.callbacks.onNonResponseUpdate) {
           this.callbacks.onNonResponseUpdate(messageWithId);
-        }
-        
-        if (this.callbacks.onNonResponseUnread) {
-          this.callbacks.onNonResponseUnread(messageWithId.id);
         }
       } catch (error) {
         console.error("비응답 매장 메시지 처리 오류:", error);

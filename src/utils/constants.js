@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   SAME_PERSON_DATA: 'same_person_data',
   SALES_TOTAL_DATA: 'sales_total_data',
   SALES_TIME_SERIES_DATA: 'sales_time_series_data',
+  SALES_MINUTE_DATA: 'sales_minute_data',
   TOP_STORES_DATA: 'top_stores_data',
   NON_RESPONSE_DATA: 'non_response_data',
   SELECTED_BRAND: 'selected_brand',
@@ -29,6 +30,7 @@ export const API_CONSTANTS = {
       PAYMENT_LIMIT: '/topic/payment-limit',
       SAME_PERSON: '/topic/same-person',
       SALES_TOTAL: '/topic/sales-total',
+      SALES_MINUTE: '/topic/sales-minute',
       TOP_STORES: '/topic/top-stores',
       NON_RESPONSE: '/topic/non-response',
       SERVER_STATUS: '/topic/server-status'
