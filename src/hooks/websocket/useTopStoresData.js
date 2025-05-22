@@ -15,9 +15,6 @@ export const useTopStoresData = (selectedBrand) => {
     return [];
   });
   
-  // 읽지 않은 메시지 상태
-  const [unreadTopStores, setUnreadTopStores] = useState(new Set());
-  
   // localStorage 저장 effect
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.TOP_STORES_DATA, JSON.stringify(topStoresData));
@@ -29,27 +26,9 @@ export const useTopStoresData = (selectedBrand) => {
     return topStoresData.filter(item => item.store_brand === selectedBrand);
   }, [topStoresData, selectedBrand]);
   
-  // 필터링된 unread 메시지
-  const filteredUnreadTopStores = useMemo(() => {
-    if (!selectedBrand) return unreadTopStores;
-    
-    const filteredUnread = new Set();
-    unreadTopStores.forEach(messageId => {
-      const message = topStoresData.find(item => item.id === messageId);
-      if (message && message.store_brand === selectedBrand) {
-        filteredUnread.add(messageId);
-      }
-    });
-    return filteredUnread;
-  }, [unreadTopStores, topStoresData, selectedBrand]);
-  
-  // 클릭 핸들러
+  // 클릭 핸들러 (단순 로그용으로만 유지)
   const handleTopStoresCardClick = useCallback((messageId) => {
-    setUnreadTopStores(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(messageId);
-      return newSet;
-    });
+    console.log('Top stores card clicked:', messageId);
   }, []);
   
   // 콜백 함수들
@@ -69,9 +48,6 @@ export const useTopStoresData = (selectedBrand) => {
         }
       });
     },
-    onTopStoresUnread: (messageId) => {
-      setUnreadTopStores(prev => new Set([...prev, messageId]));
-    },
     onTopStoresBatchUpdate: (dataWithIds, isBatch) => {
       if (isBatch) {
         setTopStoresData(dataWithIds);
@@ -82,27 +58,8 @@ export const useTopStoresData = (selectedBrand) => {
     }
   }), []);
   
-  // 브랜드 변경 시 unread 필터링
-  useEffect(() => {
-    if (selectedBrand !== null) {
-      setUnreadTopStores(prev => {
-        const filtered = new Set();
-        prev.forEach(messageId => {
-          // 기존 데이터는 unread에서 제외
-          if (messageId.toString().startsWith(MESSAGE_ID_PREFIX.EXISTING)) return;
-          const message = topStoresData.find(item => item.id === messageId);
-          if (message && message.store_brand === selectedBrand) {
-            filtered.add(messageId);
-          }
-        });
-        return filtered;
-      });
-    }
-  }, [selectedBrand, topStoresData]);
-  
   return {
     topStoresData: filteredTopStoresData,
-    unreadTopStores: filteredUnreadTopStores,
     handleTopStoresCardClick,
     callbacks
   };

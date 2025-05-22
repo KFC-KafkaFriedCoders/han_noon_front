@@ -52,28 +52,23 @@ export const useWebSocket = () => {
   return {
     // Payment Limit 데이터
     paymentLimitData: paymentLimit.paymentLimitData,
-    unreadPaymentLimit: paymentLimit.unreadPaymentLimit,
     handlePaymentLimitCardClick: paymentLimit.handlePaymentLimitCardClick,
     
     // Same Person 데이터
     samePersonData: samePerson.samePersonData,
-    unreadSamePerson: samePerson.unreadSamePerson,
     handleSamePersonCardClick: samePerson.handleSamePersonCardClick,
     
     // Sales Total 데이터
     salesTotalData: salesTotal.salesTotalData,
     timeSeriesData: salesTotal.timeSeriesData,
-    unreadSalesTotal: salesTotal.unreadSalesTotal,
     handleSalesTotalCardClick: salesTotal.handleSalesTotalCardClick,
     
     // Top Stores 데이터
     topStoresData: topStores.topStoresData,
-    unreadTopStores: topStores.unreadTopStores,
     handleTopStoresCardClick: topStores.handleTopStoresCardClick,
     
     // Non Response 데이터
     nonResponseData: nonResponse.nonResponseData,
-    unreadNonResponse: nonResponse.unreadNonResponse,
     handleNonResponseCardClick: nonResponse.handleNonResponseCardClick,
     
     // 연결 상태

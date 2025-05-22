@@ -21,9 +21,6 @@ export const usePaymentLimitData = (selectedBrand) => {
     return [];
   });
   
-  // 읽지 않은 메시지 상태
-  const [unreadPaymentLimit, setUnreadPaymentLimit] = useState(new Set());
-  
   // localStorage 저장 effect
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PAYMENT_LIMIT_DATA, JSON.stringify(paymentLimitResponse));
@@ -35,34 +32,9 @@ export const usePaymentLimitData = (selectedBrand) => {
     return paymentLimitResponse.filter(item => item.store_brand === selectedBrand);
   }, [paymentLimitResponse, selectedBrand]);
   
-  // 필터링된 unread 메시지
-  const filteredUnreadPaymentLimit = useMemo(() => {
-    if (!selectedBrand) return unreadPaymentLimit;
-    
-    const filteredUnread = new Set();
-    unreadPaymentLimit.forEach(messageId => {
-      const message = paymentLimitResponse.find(item => item.id === messageId);
-      if (message && message.store_brand === selectedBrand) {
-        filteredUnread.add(messageId);
-      }
-    });
-    return filteredUnread;
-  }, [unreadPaymentLimit, paymentLimitResponse, selectedBrand]);
-  
-  // 클릭 핸들러
+  // 클릭 핸들러 (단순 로그용으로만 유지)
   const handlePaymentLimitCardClick = useCallback((messageId) => {
-    // 'all'이면 모든 알림 제거
-    if (messageId === 'all') {
-      setUnreadPaymentLimit(new Set());
-      return;
-    }
-    
-    // 특정 알림 제거
-    setUnreadPaymentLimit(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(messageId);
-      return newSet;
-    });
+    console.log('Payment limit card clicked:', messageId);
   }, []);
   
   // 콜백 함수들
@@ -71,33 +43,11 @@ export const usePaymentLimitData = (selectedBrand) => {
       setPaymentLimitResponse(prev => 
         [messageWithId, ...prev].slice(0, MAX_MESSAGES)
       );
-    },
-    onPaymentLimitUnread: (messageId) => {
-      setUnreadPaymentLimit(prev => new Set([...prev, messageId]));
     }
   }), []);
   
-  // 브랜드 변경 시 unread 필터링
-  useEffect(() => {
-    if (selectedBrand !== null) {
-      setUnreadPaymentLimit(prev => {
-        const filtered = new Set();
-        prev.forEach(messageId => {
-          // 기존 데이터는 unread에서 제외
-          if (messageId.toString().startsWith(MESSAGE_ID_PREFIX.EXISTING)) return;
-          const message = paymentLimitResponse.find(item => item.id === messageId);
-          if (message && message.store_brand === selectedBrand) {
-            filtered.add(messageId);
-          }
-        });
-        return filtered;
-      });
-    }
-  }, [selectedBrand, paymentLimitResponse]);
-  
   return {
     paymentLimitData,
-    unreadPaymentLimit: filteredUnreadPaymentLimit,
     handlePaymentLimitCardClick,
     callbacks
   };

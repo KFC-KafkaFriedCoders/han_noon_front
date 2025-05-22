@@ -10,13 +10,9 @@ const { MAX_MESSAGES } = DATA_LIMITS;
  */
 export const useWebSocketCallbacks = ({
   setPaymentLimitResponse,
-  setUnreadPaymentLimit,
   setSamePersonResponse,
-  setUnreadSamePerson,
   setSalesTotalData,
-  setUnreadSalesTotal,
   setTopStoresData,
-  setUnreadTopStores,
   updateSalesTimeSeries
 }) => {
   
@@ -28,18 +24,12 @@ export const useWebSocketCallbacks = ({
         [messageWithId, ...prev].slice(0, MAX_MESSAGES)
       );
     },
-    onPaymentLimitUnread: (messageId) => {
-      setUnreadPaymentLimit(prev => new Set([...prev, messageId]));
-    },
 
     // Same Person 콜백들
     onSamePersonUpdate: (messageWithId) => {
       setSamePersonResponse(prev => 
         [messageWithId, ...prev].slice(0, MAX_MESSAGES)
       );
-    },
-    onSamePersonUnread: (messageId) => {
-      setUnreadSamePerson(prev => new Set([...prev, messageId]));
     },
 
     // Sales Total 콜백들
@@ -57,9 +47,6 @@ export const useWebSocketCallbacks = ({
           return [messageWithId, ...prev];
         }
       });
-    },
-    onSalesTotalUnread: (messageId) => {
-      setUnreadSalesTotal(prev => new Set([...prev, messageId]));
     },
     onSalesTotalBatchUpdate: (itemsWithIds, isBatch) => {
       if (isBatch) {
@@ -89,9 +76,6 @@ export const useWebSocketCallbacks = ({
         }
       });
     },
-    onTopStoresUnread: (messageId) => {
-      setUnreadTopStores(prev => new Set([...prev, messageId]));
-    },
     onTopStoresBatchUpdate: (dataWithIds, isBatch) => {
       if (isBatch) {
         setTopStoresData(dataWithIds);
@@ -107,13 +91,9 @@ export const useWebSocketCallbacks = ({
     }
   }), [
     setPaymentLimitResponse, 
-    setUnreadPaymentLimit, 
     setSamePersonResponse, 
-    setUnreadSamePerson, 
     setSalesTotalData, 
-    setUnreadSalesTotal, 
     setTopStoresData, 
-    setUnreadTopStores, 
     updateSalesTimeSeries
   ]);
 };

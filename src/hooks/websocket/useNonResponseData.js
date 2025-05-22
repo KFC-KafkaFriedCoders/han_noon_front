@@ -17,9 +17,6 @@ export const useNonResponseData = (selectedBrand) => {
     return [];
   });
   
-  // 읽지 않은 메시지 상태
-  const [unreadNonResponse, setUnreadNonResponse] = useState(new Set());
-  
   // localStorage 저장 effect
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.NON_RESPONSE_DATA, JSON.stringify(nonResponseData));
@@ -31,34 +28,9 @@ export const useNonResponseData = (selectedBrand) => {
     return nonResponseData.filter(item => item.store_brand === selectedBrand);
   }, [nonResponseData, selectedBrand]);
   
-  // 필터링된 unread 메시지
-  const filteredUnreadNonResponse = useMemo(() => {
-    if (!selectedBrand) return unreadNonResponse;
-    
-    const filteredUnread = new Set();
-    unreadNonResponse.forEach(messageId => {
-      const message = nonResponseData.find(item => item.id === messageId);
-      if (message && message.store_brand === selectedBrand) {
-        filteredUnread.add(messageId);
-      }
-    });
-    return filteredUnread;
-  }, [unreadNonResponse, nonResponseData, selectedBrand]);
-  
-  // 클릭 핸들러
+  // 클릭 핸들러 (단순 로그용으로만 유지)
   const handleNonResponseCardClick = useCallback((messageId) => {
-    // 'all'이면 모든 알림 제거
-    if (messageId === 'all') {
-      setUnreadNonResponse(new Set());
-      return;
-    }
-    
-    // 특정 알림 제거
-    setUnreadNonResponse(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(messageId);
-      return newSet;
-    });
+    console.log('Non response card clicked:', messageId);
   }, []);
   
   // 콜백 함수들
@@ -80,33 +52,11 @@ export const useNonResponseData = (selectedBrand) => {
           return [messageWithId, ...prev].slice(0, MAX_MESSAGES);
         }
       });
-    },
-    onNonResponseUnread: (messageId) => {
-      setUnreadNonResponse(prev => new Set([...prev, messageId]));
     }
   }), []);
   
-  // 브랜드 변경 시 unread 필터링
-  useEffect(() => {
-    if (selectedBrand !== null) {
-      setUnreadNonResponse(prev => {
-        const filtered = new Set();
-        prev.forEach(messageId => {
-          // 기존 데이터는 unread에서 제외
-          if (messageId.toString().startsWith(MESSAGE_ID_PREFIX.EXISTING)) return;
-          const message = nonResponseData.find(item => item.id === messageId);
-          if (message && message.store_brand === selectedBrand) {
-            filtered.add(messageId);
-          }
-        });
-        return filtered;
-      });
-    }
-  }, [selectedBrand, nonResponseData]);
-  
   return {
     nonResponseData: filteredNonResponseData,
-    unreadNonResponse: filteredUnreadNonResponse,
     handleNonResponseCardClick,
     callbacks
   };

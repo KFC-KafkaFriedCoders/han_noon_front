@@ -17,9 +17,6 @@ export const useSamePersonData = (selectedBrand) => {
     return [];
   });
   
-  // 읽지 않은 메시지 상태
-  const [unreadSamePerson, setUnreadSamePerson] = useState(new Set());
-  
   // localStorage 저장 effect
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SAME_PERSON_DATA, JSON.stringify(samePersonResponse));
@@ -31,34 +28,9 @@ export const useSamePersonData = (selectedBrand) => {
     return samePersonResponse.filter(item => item.store_brand === selectedBrand);
   }, [samePersonResponse, selectedBrand]);
   
-  // 필터링된 unread 메시지
-  const filteredUnreadSamePerson = useMemo(() => {
-    if (!selectedBrand) return unreadSamePerson;
-    
-    const filteredUnread = new Set();
-    unreadSamePerson.forEach(messageId => {
-      const message = samePersonResponse.find(item => item.id === messageId);
-      if (message && message.store_brand === selectedBrand) {
-        filteredUnread.add(messageId);
-      }
-    });
-    return filteredUnread;
-  }, [unreadSamePerson, samePersonResponse, selectedBrand]);
-  
-  // 클릭 핸들러
+  // 클릭 핸들러 (단순 로그용으로만 유지)
   const handleSamePersonCardClick = useCallback((messageId) => {
-    // 'all'이면 모든 알림 제거
-    if (messageId === 'all') {
-      setUnreadSamePerson(new Set());
-      return;
-    }
-    
-    // 특정 알림 제거
-    setUnreadSamePerson(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(messageId);
-      return newSet;
-    });
+    console.log('Same person card clicked:', messageId);
   }, []);
   
   // 콜백 함수들
@@ -67,33 +39,11 @@ export const useSamePersonData = (selectedBrand) => {
       setSamePersonResponse(prev => 
         [messageWithId, ...prev].slice(0, MAX_MESSAGES)
       );
-    },
-    onSamePersonUnread: (messageId) => {
-      setUnreadSamePerson(prev => new Set([...prev, messageId]));
     }
   }), []);
   
-  // 브랜드 변경 시 unread 필터링
-  useEffect(() => {
-    if (selectedBrand !== null) {
-      setUnreadSamePerson(prev => {
-        const filtered = new Set();
-        prev.forEach(messageId => {
-          // 기존 데이터는 unread에서 제외
-          if (messageId.toString().startsWith(MESSAGE_ID_PREFIX.EXISTING)) return;
-          const message = samePersonResponse.find(item => item.id === messageId);
-          if (message && message.store_brand === selectedBrand) {
-            filtered.add(messageId);
-          }
-        });
-        return filtered;
-      });
-    }
-  }, [selectedBrand, samePersonResponse]);
-  
   return {
     samePersonData,
-    unreadSamePerson: filteredUnreadSamePerson,
     handleSamePersonCardClick,
     callbacks
   };

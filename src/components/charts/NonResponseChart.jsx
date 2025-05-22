@@ -6,43 +6,21 @@ import NonResponseCardItem from '../common/ui/cards/NonResponseCardItem';
 const NonResponseChart = ({
   title,
   nonResponseArr = [],
-  unreadMessages = new Set(),
   onCardClick = () => {},
 }) => {
   return (
     <ChartPanel 
       title={title}
       color="yellow"
-      rightComponent={
-        unreadMessages.size > 0 && (
-          <div className="flex items-center">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onCardClick('all');
-              }} 
-              className="mr-2 text-xs text-gray-300 hover:text-white transition-colors"
-            >
-              전체 읽음
-            </button>
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
-              {unreadMessages.size}
-            </span>
-          </div>
-        )
-      }
     >
       <div className="h-80 overflow-y-auto custom-scrollbar p-1">
         {nonResponseArr.length > 0 ? (
           <ul className="space-y-2">
             {nonResponseArr.map((store, index) => {
-              const isUnread = unreadMessages.has(store.id);
-              
               return (
                 <NonResponseCardItem
                   key={store.id || index}
                   store={store}
-                  isUnread={isUnread}
                   accentColor="yellow"
                   onClick={onCardClick}
                 />

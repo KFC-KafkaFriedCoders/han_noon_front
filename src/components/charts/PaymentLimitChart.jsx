@@ -6,48 +6,27 @@ import AlertCardItem from '../common/ui/cards/AlertCardItem';
 const PaymentLimitChart = ({
   title,
   paymentArr = [],
-  unreadMessages = new Set(),
   onCardClick = () => {},
 }) => {
   return (
     <ChartPanel 
       title={title}
       color="green"
-      rightComponent={
-        unreadMessages.size > 0 && (
-          <div className="flex items-center">
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                onCardClick('all');
-              }} 
-              className="mr-2 text-xs text-gray-300 hover:text-white transition-colors"
-            >
-              전체 읽음
-            </button>
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
-              {unreadMessages.size}
-            </span>
-          </div>
-        )
-      }
     >
       <div className="h-80 overflow-y-auto custom-scrollbar p-1">
         {paymentArr.length > 0 ? (
           <ul className="space-y-2">
             {paymentArr.map((msg, index) => {
               const messageText = msg.alert_message || msg.alertMessage;
-              const isUnread = unreadMessages.has(msg.id);
               
               return (
                 <AlertCardItem
                   key={msg.id || index}
                   item={msg}
-                  isUnread={isUnread}
                   messageText={messageText}
                   accentColor="green"
                   timeField="time"
-                  titleText="알림"
+                  titleText="정보"
                   onClick={onCardClick}
                 />
               );

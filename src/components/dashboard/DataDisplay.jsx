@@ -23,11 +23,6 @@ const DataDisplay = () => {
     topStoresData,
     nonResponseData,
     timeSeriesData,
-    unreadPaymentLimit,
-    unreadSamePerson,
-    unreadSalesTotal,
-    unreadTopStores,
-    unreadNonResponse,
     handlePaymentLimitCardClick,
     handleSamePersonCardClick,
     handleSalesTotalCardClick,
@@ -41,13 +36,11 @@ const DataDisplay = () => {
       <MemoizedPaymentLimitChart 
         title="이상 결제 탐지" 
         paymentArr={paymentLimitData}
-        unreadMessages={unreadPaymentLimit}
         onCardClick={handlePaymentLimitCardClick}
       />
       <MemoizedSamePersonChart 
         title="동일인 결제 탐지" 
         paymentArr={samePersonData}
-        unreadMessages={unreadSamePerson}
         onCardClick={handleSamePersonCardClick}
       />
       <MemoizedSalesTotalChart 
@@ -62,9 +55,8 @@ const DataDisplay = () => {
         onCardClick={handleTopStoresCardClick}
       />
       <MemoizedNonResponseChart
-        title="비응답 매장 알림" 
+        title="비응답 매장 정보" 
         nonResponseArr={nonResponseData}
-        unreadMessages={unreadNonResponse}
         onCardClick={handleNonResponseCardClick}
       />
     </>
