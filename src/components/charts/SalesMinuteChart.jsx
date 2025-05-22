@@ -1,4 +1,3 @@
-import React from "react";
 import ChartPanel from '../common/ui/ChartPanel';
 import LoadingState from '../common/ui/LoadingState';
 
@@ -33,16 +32,6 @@ const SalesMinuteChart = ({
                     <div className="bg-gray-700 p-2 rounded-md mb-2">
                       {messageText}
                     </div>
-                    {data.update_time && (
-                      <div className="text-xs text-gray-400 text-right">
-                        {data.update_time}
-                      </div>
-                    )}
-                    {data.server_received_time && (
-                      <div className="text-xs text-gray-500 text-right mt-1">
-                        수신: {data.server_received_time}
-                      </div>
-                    )}
                   </div>
                 </li>
               );
