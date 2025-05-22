@@ -23,9 +23,6 @@ const NonResponseCardItem = ({
             <span className="text-gray-400 text-xs ml-2">(ID: {store.store_id})</span>
           </div>
         </div>
-        <div className="text-xs text-gray-300">
-          <span>마지막 활동: {store.last_activity}</span>
-        </div>
       </div>
     </li>
   );

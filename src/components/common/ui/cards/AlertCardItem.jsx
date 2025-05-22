@@ -23,11 +23,6 @@ const AlertCardItem = ({
         <div className="bg-gray-700 p-2 rounded-md mb-2">
           {messageText}
         </div>
-        {item[timeField] && (
-          <div className="text-xs text-gray-400 text-right">
-            {new Date(item[timeField]).toLocaleString()}
-          </div>
-        )}
       </div>
     </li>
   );
