@@ -13,7 +13,7 @@ const SalesMinuteChart = ({
   return (
     <ChartPanel 
       title={title}
-      color="gray"
+      color="teal"
     >
       <div className="h-80 overflow-y-auto custom-scrollbar p-1">
         {salesMinuteArr.length > 0 ? (

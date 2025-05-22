@@ -33,19 +33,25 @@ const LoadingState = ({
     return bgColorMap[color] || (isDarkMode ? 'bg-gray-900/30' : 'bg-gray-100');
   };
 
+  const getDotClass = () => {
+    switch(color) {
+      case 'green': return 'bg-green-500';
+      case 'blue': return 'bg-blue-500';
+      case 'orange': return 'bg-orange-500';
+      case 'yellow': return 'bg-yellow-500';
+      case 'purple': return 'bg-purple-500';
+      case 'teal': return 'bg-teal-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   const defaultIcon = (
     <svg className={`w-6 h-6 ${getIconClass()}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4"></path>
     </svg>
   );
 
-  const renderDots = (color) => (
-    <>
-      <div className={`w-2 h-2 bg-${color}-500 rounded-full animate-bounce`} style={{ animationDelay: '0ms' }}></div>
-      <div className={`w-2 h-2 bg-${color}-500 rounded-full animate-bounce`} style={{ animationDelay: '150ms' }}></div>
-      <div className={`w-2 h-2 bg-${color}-500 rounded-full animate-bounce`} style={{ animationDelay: '300ms' }}></div>
-    </>
-  );
+  const dotClass = getDotClass();
 
   return (
     <div className={`flex flex-col items-center justify-center py-6 rounded-lg transition-colors duration-300 ${
@@ -65,7 +71,9 @@ const LoadingState = ({
         {message}
       </p>
       <div className="flex space-x-2 justify-center mt-2">
-        {renderDots(color)}
+        <div className={`w-2 h-2 ${dotClass} rounded-full animate-bounce`} style={{ animationDelay: '0ms' }}></div>
+        <div className={`w-2 h-2 ${dotClass} rounded-full animate-bounce`} style={{ animationDelay: '150ms' }}></div>
+        <div className={`w-2 h-2 ${dotClass} rounded-full animate-bounce`} style={{ animationDelay: '300ms' }}></div>
       </div>
     </div>
   );
