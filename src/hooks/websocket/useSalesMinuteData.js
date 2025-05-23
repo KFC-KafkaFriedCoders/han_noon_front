@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { STORAGE_KEYS, MESSAGE_ID_PREFIX, DATA_LIMITS } from '../../utils/constants';
 
 const { MAX_MESSAGES } = DATA_LIMITS;
-const MAX_MINUTE_HISTORY = 5; // 최근 5개 데이터만 저장
+const MAX_MINUTE_HISTORY = 5; 
 
 export const useSalesMinuteData = (selectedBrand) => {
   const [salesMinuteData, setSalesMinuteData] = useState(() => {
@@ -17,7 +17,6 @@ export const useSalesMinuteData = (selectedBrand) => {
     return [];
   });
 
-  // 브랜드별 시계열 데이터 (그래프용)
   const [salesMinuteTimeSeriesData, setSalesMinuteTimeSeriesData] = useState(() => {
     const savedData = localStorage.getItem(STORAGE_KEYS.SALES_MINUTE_TIME_SERIES_DATA);
     if (savedData) {
@@ -39,13 +38,11 @@ export const useSalesMinuteData = (selectedBrand) => {
     localStorage.setItem(STORAGE_KEYS.SALES_MINUTE_TIME_SERIES_DATA, JSON.stringify(salesMinuteTimeSeriesData));
   }, [salesMinuteTimeSeriesData]);
   
-  // 표시용 데이터 (최신 1개만)
   const filteredSalesMinuteData = useMemo(() => {
     if (!selectedBrand) return salesMinuteData;
     return salesMinuteData.filter(item => item.store_brand === selectedBrand);
   }, [salesMinuteData, selectedBrand]);
 
-  // 그래프용 시계열 데이터 (최근 5개)
   const minuteTimeSeriesData = useMemo(() => {
     if (!selectedBrand || !salesMinuteTimeSeriesData[selectedBrand]) {
       return [];
@@ -57,7 +54,6 @@ export const useSalesMinuteData = (selectedBrand) => {
     console.log('Sales minute card clicked:', messageId);
   }, []);
 
-  // 시계열 데이터 업데이트 함수
   const updateSalesMinuteTimeSeries = useCallback((newSalesData) => {
     const brand = newSalesData.store_brand;
     if (!brand) return;
@@ -89,7 +85,6 @@ export const useSalesMinuteData = (selectedBrand) => {
   
   const callbacks = useMemo(() => ({
     onSalesMinuteUpdate: (messageWithId) => {
-      // 1. 표시용 데이터 업데이트 (최신 1개만)
       setSalesMinuteData(prev => {
         const existingBrandIndex = prev.findIndex(
           item => item.store_brand === messageWithId.store_brand
@@ -104,7 +99,6 @@ export const useSalesMinuteData = (selectedBrand) => {
         }
       });
 
-      // 2. 시계열 데이터 업데이트 (최근 5개까지)
       updateSalesMinuteTimeSeries(messageWithId);
     },
     onSalesMinuteEmpty: (brand) => {
@@ -113,8 +107,8 @@ export const useSalesMinuteData = (selectedBrand) => {
   }), [updateSalesMinuteTimeSeries]);
   
   return {
-    salesMinuteData: filteredSalesMinuteData, // 표시용 (최신 1개)
-    minuteTimeSeriesData, // 그래프용 (최근 5개)
+    salesMinuteData: filteredSalesMinuteData, 
+    minuteTimeSeriesData, 
     handleSalesMinuteCardClick,
     callbacks
   };

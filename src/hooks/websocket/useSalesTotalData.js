@@ -4,7 +4,6 @@ import { STORAGE_KEYS, MESSAGE_ID_PREFIX, DATA_LIMITS } from '../../utils/consta
 const { MAX_MESSAGES, MAX_TIME_SERIES } = DATA_LIMITS;
 
 export const useSalesTotalData = (selectedBrand) => {
-  // 매출 데이터 상태
   const [salesTotalData, setSalesTotalData] = useState(() => {
     const savedData = localStorage.getItem(STORAGE_KEYS.SALES_TOTAL_DATA);
     if (savedData) {
@@ -17,7 +16,6 @@ export const useSalesTotalData = (selectedBrand) => {
     return [];
   });
 
-  // 시계열 데이터 상태
   const [salesTimeSeriesData, setSalesTimeSeriesData] = useState(() => {
     const savedData = localStorage.getItem(STORAGE_KEYS.SALES_TIME_SERIES_DATA);
     if (savedData) {
@@ -31,7 +29,6 @@ export const useSalesTotalData = (selectedBrand) => {
     return {};
   });
   
-  // localStorage 저장 effects
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SALES_TOTAL_DATA, JSON.stringify(salesTotalData));
   }, [salesTotalData]);
@@ -40,13 +37,11 @@ export const useSalesTotalData = (selectedBrand) => {
     localStorage.setItem(STORAGE_KEYS.SALES_TIME_SERIES_DATA, JSON.stringify(salesTimeSeriesData));
   }, [salesTimeSeriesData]);
   
-  // 브랜드별 데이터 필터링
   const filteredSalesTotalData = useMemo(() => {
     if (!selectedBrand) return salesTotalData;
     return salesTotalData.filter(item => item.store_brand === selectedBrand);
   }, [salesTotalData, selectedBrand]);
   
-  // 현재 선택된 브랜드의 시간순 데이터
   const timeSeriesData = useMemo(() => {
     if (!selectedBrand || !salesTimeSeriesData[selectedBrand]) {
       return [];
@@ -54,12 +49,10 @@ export const useSalesTotalData = (selectedBrand) => {
     return salesTimeSeriesData[selectedBrand];
   }, [salesTimeSeriesData, selectedBrand]);
   
-  // 클릭 핸들러 (단순 로그용으로만 유지)
   const handleSalesTotalCardClick = useCallback((messageId) => {
     console.log('Sales total card clicked:', messageId);
   }, []);
   
-  // 시간순 누적 데이터 업데이트 함수
   const updateSalesTimeSeries = useCallback((newSalesData) => {
     const brand = newSalesData.store_brand;
     if (!brand) return;
@@ -88,7 +81,6 @@ export const useSalesTotalData = (selectedBrand) => {
     });
   }, []);
   
-  // 콜백 함수들
   const callbacks = useMemo(() => ({
     onSalesTotalUpdate: (messageWithId) => {
       setSalesTotalData(prev => {

@@ -3,7 +3,6 @@ import { useBrand } from "../context/BrandContext";
 import { useTheme } from "../context/theme/ThemeContext";
 import { IoIosArrowDown } from "react-icons/io";
 
-// 옵션 배열 - 그룹화 없이 정렬만 해서 사용
 const franchiseOptions = [
   "빽다방",
   "한신포차",
@@ -36,20 +35,17 @@ const CommandInput = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // selectedBrand가 변경될 때 inputSelectedBrand도 업데이트
   useEffect(() => {
     setInputSelectedBrand(selectedBrand);
   }, [selectedBrand]);
 
-  // 브랜드 변경 함수
   const handleBrandSelect = useCallback((brand) => {
     setInputSelectedBrand(brand);
-    setSelectedBrand(brand); // 바로 적용
+    setSelectedBrand(brand); 
     setIsDropdownOpen(false);
     setSearchTerm('');
   }, [setSelectedBrand]);
 
-  // 검색 화면에서 이스케이프 키 입력 처리
   const handleKeyDown = useCallback((e) => {
     if (e.key === 'Escape') {
       setIsDropdownOpen(false);
@@ -57,7 +53,6 @@ const CommandInput = () => {
     }
   }, []);
 
-  // 검색어 필터링된 메뉴 아이템
   const filteredOptions = searchTerm.trim() 
     ? franchiseOptions.filter(option => 
         option.toLowerCase().includes(searchTerm.toLowerCase()))

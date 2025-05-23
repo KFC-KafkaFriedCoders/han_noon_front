@@ -27,10 +27,7 @@ const HeaderNew = () => {
   } = useWebSocket();
   
   const handleBookClick = () => {
-    // 기존 네비게이션 기능은 주석 처리
-    // navigate('/monitor');
-    
-    // CSV 다운로드 기능 실행
+
     handleCSVDownload();
   };
 
@@ -40,7 +37,6 @@ const HeaderNew = () => {
       return;
     }
 
-    // 현재 선택된 브랜드의 모든 데이터 수집
     const dataSets = [
       {
         title: '이상 결제 탐지',
@@ -64,7 +60,6 @@ const HeaderNew = () => {
       }
     ];
 
-    // TOP 매장 데이터 처리 (구조가 다름)
     const topStoresFiltered = topStoresData
       .filter(item => item.store_brand === selectedBrand)
       .flatMap(item => 
@@ -82,7 +77,6 @@ const HeaderNew = () => {
       });
     }
 
-    // 매출 총합 시계열 데이터 추가
     if (timeSeriesData && timeSeriesData.length > 0) {
       dataSets.push({
         title: '시간별 매출 총합 추이',
@@ -95,7 +89,6 @@ const HeaderNew = () => {
       });
     }
 
-    // 1분당 매출 시계열 데이터 추가 (새로 추가!)
     if (minuteTimeSeriesData && minuteTimeSeriesData.length > 0) {
       dataSets.push({
         title: '1분당 매출 추이 (최근 5분)',
@@ -110,7 +103,6 @@ const HeaderNew = () => {
       });
     }
 
-    // 데이터가 있는지 확인
     const hasData = dataSets.some(dataset => dataset.data && dataset.data.length > 0);
     
     if (!hasData) {
@@ -119,19 +111,14 @@ const HeaderNew = () => {
     }
 
     try {
-      // 통합 데이터 생성
       const combinedData = combineDataSets(dataSets);
       
-      // CSV 변환
       const csvContent = convertToCSV(combinedData);
       
-      // 파일명 생성
       const fileName = generateFileName(selectedBrand, '프랜차이즈_데이터_');
       
-      // 다운로드 실행
       downloadCSV(csvContent, fileName);
       
-      // 성공 알림
       const dataCount = dataSets.reduce((sum, dataset) => sum + (dataset.data?.length || 0), 0);
       alert(`${selectedBrand} 데이터 다운로드 완료!\n총 ${dataCount}개 항목이 저장되었습니다.`);
       
@@ -145,7 +132,6 @@ const HeaderNew = () => {
     <header className="bg-gradient-to-r from-gray-800 to-gray-900 shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* 로고 및 브랜드명 */}
           <div className="flex items-center">
             <div className="bg-white p-1.5 rounded-lg shadow-md">
               <img 
@@ -158,7 +144,6 @@ const HeaderNew = () => {
             <span className="text-xl font-bold ml-2 text-white">KFC</span>
           </div>
           
-          {/* 현재 선택된 브랜드 표시 */}
           <div className="hidden md:flex items-center">
             {selectedBrand && (
               <div className="bg-gray-700 px-4 py-1.5 rounded-full">
@@ -169,7 +154,6 @@ const HeaderNew = () => {
             )}
           </div>
           
-          {/* 아이콘 버튼들 */}
           <div className="flex items-center space-x-2">
             <button 
               onClick={toggleDarkMode} 
@@ -191,7 +175,6 @@ const HeaderNew = () => {
               title={`${selectedBrand || '선택된 브랜드'} 데이터 CSV 다운로드`}
             >
               <ImBook size={20} />
-              {/* 툴팁 */}
               <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                 📊 {selectedBrand} 데이터 다운로드
                 <div className="absolute top-full right-3 border-4 border-transparent border-t-gray-900"></div>

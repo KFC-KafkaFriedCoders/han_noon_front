@@ -7,15 +7,14 @@ import LoadingState from '../common/ui/LoadingState';
 const SalesMinuteChart = ({
   title,
   salesMinuteArr = [],
-  minuteTimeSeriesData = [], // 그래프용 데이터 (최근 5개)
+  minuteTimeSeriesData = [],
   onCardClick = () => {},
 }) => {
   const { isDarkMode } = useTheme();
 
-  // 차트 데이터 변환 (시간 순서로 정렬)
   const chartData = minuteTimeSeriesData
     .slice()
-    .reverse() // 오래된 것부터 최신 순으로
+    .reverse()
     .map((data, index) => ({
       time: data.displayTime,
       amount: data.totalSales || 0,
@@ -28,7 +27,6 @@ const SalesMinuteChart = ({
       color="teal"
     >
       <div className="h-80 flex flex-col">
-        {/* 라인 차트 영역 - 데이터가 1개 이상일 때 표시 */}
         {chartData.length > 0 && (
           <div className={`mb-4 p-3 rounded-lg transition-colors duration-300 ${
             isDarkMode ? 'bg-gray-800' : 'bg-gray-50'
@@ -65,7 +63,6 @@ const SalesMinuteChart = ({
           </div>
         )}
         
-        {/* 기존 리스트 영역 */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
           {salesMinuteArr.length > 0 ? (
             <ul className="space-y-2">

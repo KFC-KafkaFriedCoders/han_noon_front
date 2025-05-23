@@ -18,7 +18,6 @@ const Header = () => {
     <header className="bg-gradient-to-r from-gray-800 to-gray-900 shadow-lg">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* 좌측: 로고 및 브랜드명 */}
           <div className="flex items-center">
             <div className="flex items-center">
               <div className="bg-white p-1.5 rounded-lg shadow-md">
@@ -33,7 +32,6 @@ const Header = () => {
             </div>
           </div>
           
-          {/* 중앙: 현재 선택된 브랜드 표시 (모바일에서는 숨김) */}
           <div className="hidden md:flex items-center">
             {selectedBrand && (
               <div className="bg-gray-700 px-4 py-1.5 rounded-full">
@@ -44,7 +42,6 @@ const Header = () => {
             )}
           </div>
           
-          {/* 우측: 아이콘 버튼들 */}
           <div className="flex items-center space-x-2">
             <button className="p-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-full transition-colors">
               <IoMdMoon size={20} />

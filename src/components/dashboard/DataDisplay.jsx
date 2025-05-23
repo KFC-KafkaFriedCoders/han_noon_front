@@ -17,13 +17,12 @@ const MemoizedFranchiseTopStores = memo(FranchiseTopStores);
 const MemoizedNonResponseChart = memo(NonResponseChart);
 
 const DataDisplay = () => {
-  const { selectedBrand } = useBrand();
   const {
     paymentLimitData,
     samePersonData,
     salesTotalData,
     salesMinuteData,
-    minuteTimeSeriesData, // 새로 추가된 그래프용 데이터
+    minuteTimeSeriesData, 
     topStoresData,
     nonResponseData,
     timeSeriesData,
@@ -33,7 +32,6 @@ const DataDisplay = () => {
     handleSalesMinuteCardClick,
     handleTopStoresCardClick,
     handleNonResponseCardClick,
-    connected
   } = useWebSocket();
 
   return (
@@ -62,7 +60,7 @@ const DataDisplay = () => {
       <MemoizedSalesMinuteChart 
         title="1분당 매출 모니터링" 
         salesMinuteArr={salesMinuteData}
-        minuteTimeSeriesData={minuteTimeSeriesData} // 그래프용 데이터 전달
+        minuteTimeSeriesData={minuteTimeSeriesData} 
         onCardClick={handleSalesMinuteCardClick}
       />
       <MemoizedNonResponseChart
