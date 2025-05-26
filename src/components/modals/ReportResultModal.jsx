@@ -1,9 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { IoMdClose, IoMdDownload, IoMdTime } from 'react-icons/io';
 import { useTheme } from '../../context/theme/ThemeContext';
+import { saveReport } from '../../utils/reportStorage';
 
 const ReportResultModal = ({ isOpen, onClose, reportData, isError }) => {
   const { isDarkMode } = useTheme();
+
+  // 성공한 리포트를 로컬스토리지에 저장
+  useEffect(() => {
+    if (isOpen && !isError && reportData && reportData.success && reportData.report) {
+      const reportToSave = {
+        success: true,
+        count: reportData.requestedCount,
+        content: reportData.report
+      };
+      
+      const saved = saveReport(reportToSave);
+      if (saved) {
+        console.log('✅ 리포트가 히스토리에 저장되었습니다.');
+      }
+    }
+  }, [isOpen, isError, reportData]);
 
   const handleDownload = () => {
     if (!reportData?.report) return;
