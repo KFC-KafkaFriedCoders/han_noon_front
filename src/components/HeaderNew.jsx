@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
-import { IoSettingsSharp } from 'react-icons/io5';
-import { ImBook } from 'react-icons/im';
+import { HiClipboardDocumentList, HiEye } from 'react-icons/hi2';
 import { useBrand } from '../context/BrandContext';
 import { useTheme } from '../context/theme/ThemeContext';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -36,9 +35,9 @@ const HeaderNew = () => {
     timeSeriesData
   } = useWebSocket();
   
-  // 톱니바퀴 버튼 클릭 - 리포트 모달 열기
-  const handleSettingsClick = async () => {
-    console.log('⚙️ 설정 버튼 클릭 - 리포트 모달 열기');
+  // 리포트 버튼 클릭 - 리포트 모달 열기
+  const handleReportClick = async () => {
+    console.log('📋 리포트 버튼 클릭 - 리포트 모달 열기');
     
     // 헬스체크 로딩 시작
     setIsHealthChecking(true);
@@ -98,7 +97,7 @@ const HeaderNew = () => {
     setReportError(false);
   };
   
-  const handleBookClick = () => {
+  const handleMonitoringClick = () => {
     handleCSVDownload();
   };
 
@@ -239,7 +238,7 @@ const HeaderNew = () => {
                 )}
               </button>
               <button 
-              onClick={handleSettingsClick}
+              onClick={handleReportClick}
               disabled={isHealthChecking}
               className={`p-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-full transition-colors relative group ${
                   isHealthChecking ? 'opacity-50 cursor-not-allowed' : ''
@@ -249,7 +248,7 @@ const HeaderNew = () => {
               {isHealthChecking ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 ) : (
-                <IoSettingsSharp size={20} />
+                <HiClipboardDocumentList size={20} />
               )}
               <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                 {isHealthChecking ? '서버 상태 확인 중...' : '📊 AI 리포트 생성'}
@@ -258,10 +257,10 @@ const HeaderNew = () => {
             </button>
               <button 
                 className="p-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-full transition-colors relative group"
-                onClick={handleBookClick}
+                onClick={handleMonitoringClick}
                 title={`${selectedBrand || '선택된 브랜드'} 데이터 CSV 다운로드`}
               >
-                <ImBook size={20} />
+                <HiEye size={20} />
                 <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
                   📊 {selectedBrand} 데이터 다운로드
                   <div className="absolute top-full right-3 border-4 border-transparent border-t-gray-900"></div>
