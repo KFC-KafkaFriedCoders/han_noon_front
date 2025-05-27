@@ -13,10 +13,10 @@ const AlertCardItem = ({
   
   return (
     <li
-      className={`relative p-3 rounded-lg text-sm cursor-pointer transition-all duration-200 ${
+      className={`relative p-3 rounded-lg text-sm transition-all duration-200 ${
         isDarkMode 
-          ? 'bg-gray-800 hover:bg-gray-700' 
-          : 'bg-white hover:bg-gray-50 border border-gray-200'
+          ? 'bg-gray-800 ' 
+          : 'bg-white border border-gray-200'
       }`}
       onClick={() => onClick && onClick(item.id)}
     >

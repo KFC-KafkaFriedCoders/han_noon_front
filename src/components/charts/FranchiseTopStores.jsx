@@ -70,10 +70,10 @@ const FranchiseTopStores = ({
               return (
                 <li
                   key={msg.id || index}
-                  className={`p-4 rounded-lg cursor-pointer transition-all duration-300 shadow-md ${
+                  className={`p-4 rounded-lg transition-all duration-300 shadow-md ${
                     isDarkMode 
-                      ? 'bg-gray-800 hover:bg-gray-700' 
-                      : 'bg-white hover:bg-gray-50 border border-gray-200'
+                      ? 'bg-gray-800 ' 
+                      : 'bg-white border border-gray-200'
                   }`}
                   onClick={() => onCardClick(msg.id)}
                 >
@@ -104,8 +104,8 @@ const FranchiseTopStores = ({
                               key={store.store_id || storeIndex} 
                               className={`p-3 rounded-lg transition-all duration-300 border-2 ${
                                 isDarkMode 
-                                  ? 'bg-gray-700 hover:bg-gray-600' 
-                                  : 'bg-gray-50 hover:bg-gray-100'
+                                  ? 'bg-gray-700' 
+                                  : 'bg-gray-50'
                               } ${medal.borderColor}`}
                               style={{ transitionDelay: `${storeIndex * 100}ms` }}
                             >
