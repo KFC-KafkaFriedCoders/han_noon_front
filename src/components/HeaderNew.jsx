@@ -96,6 +96,14 @@ const HeaderNew = () => {
     setReportResult(null);
     setReportError(false);
   };
+
+  // 결과 모달만 닫고 생성 모달은 다시 열기
+  const handleCloseResultModal = () => {
+    setIsResultModalOpen(false);
+    setReportResult(null);
+    setReportError(false);
+    setIsReportModalOpen(true);  // 생성 모달 다시 열기
+  };
   
   const handleMonitoringClick = () => {
     handleCSVDownload();
@@ -280,7 +288,7 @@ const HeaderNew = () => {
       
       <ReportResultModal
         isOpen={isResultModalOpen}
-        onClose={handleCloseModals}
+        onClose={handleCloseResultModal}
         reportData={reportResult}
         isError={reportError}
       />

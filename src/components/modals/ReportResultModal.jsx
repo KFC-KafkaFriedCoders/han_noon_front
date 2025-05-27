@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { IoMdClose, IoMdDownload, IoMdTime } from 'react-icons/io';
 import { useTheme } from '../../context/theme/ThemeContext';
 import { saveReport } from '../../utils/reportStorage';
+import { downloadReportAsCSV } from '../../utils/reportDownload';
 
 const ReportResultModal = ({ isOpen, onClose, reportData, isError }) => {
   const { isDarkMode } = useTheme();
@@ -25,95 +26,16 @@ const ReportResultModal = ({ isOpen, onClose, reportData, isError }) => {
   const handleDownload = () => {
     if (!reportData?.report) return;
     
-    // CSV 데이터 생성
-    const csvData = parseReportToCSV(reportData.report);
-    
-    // BOM 추가로 한글 깨짐 방지
-    const BOM = '\uFEFF';
-    const csvContent = BOM + csvData;
-    
-    const blob = new Blob([csvContent], { 
-      type: 'text/csv;charset=utf-8' 
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-    const count = reportData.requestedCount || 'Unknown';
-    link.download = `한눈_AI_리포트_${count}건_${timestamp}.csv`;
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  const parseReportToCSV = (reportText) => {
-    const lines = reportText.split('\n').map(line => line.trim()).filter(line => line);
-    const csvRows = [];
-    
-    // CSV 헤더
-    csvRows.push('분류,항목,내용,금액');
-    
-    let currentCategory = '';
-
-    for (const line of lines) {
-      // 주요 섹션 제목 (숫자. 또는 ### 시작)
-      if (line.match(/^\d+\.|^###\s*\d+/)) {
-        currentCategory = line.replace(/^\d+\.\s*|^###\s*\d+\.\s*/, '').trim();
-        csvRows.push(`"${currentCategory}","","",""`);
-        continue;
-      }
-      
-      // 하대 제목 (### 시작하지만 숫자 없음)
-      if (line.match(/^###\s*[^\d]/)) {
-        const subTitle = line.replace(/^###\s*/, '').trim();
-        csvRows.push(`"${subTitle}","","",""`);
-        continue;
-      }
-      
-      // 리스트 아이템 (- 시작)
-      if (line.startsWith('-')) {
-        const content = line.replace(/^-\s*/, '').trim();
-        
-        // **이름**: 금액 형식 처리
-        const match = content.match(/^\*\*(.*?)\*\*:?\s*(.*)/);
-        if (match) {
-          let [, name, rest] = match;
-          name = name.trim();
-          rest = rest.trim();
-          
-          // 금액 추출 ([\d,]+원 형식)
-          const amountMatch = rest.match(/([\d,]+원)/);
-          if (amountMatch) {
-            const amount = amountMatch[1];
-            const description = rest.replace(amountMatch[0], '').replace(/^\s*-\s*/, '').trim();
-            csvRows.push(`"","${escapeCSV(name)}","${escapeCSV(description)}","${amount}"`);
-          } else {
-            csvRows.push(`"","${escapeCSV(name)}","${escapeCSV(rest)}",""`);
-          }
-        } else {
-          // 일반 리스트 아이템
-          csvRows.push(`"","","${escapeCSV(content)}",""`);
-        }
-        continue;
-      }
-      
-      // 일반 텍스트 (단락 또는 설명)
-      if (line.length > 0) {
-        csvRows.push(`"","","${escapeCSV(line)}",""`);
-      }
+    try {
+      const count = reportData.requestedCount || 'Unknown';
+      downloadReportAsCSV(reportData.report, count);
+    } catch (error) {
+      console.error('리포트 다운로드 실패:', error);
+      alert('리포트 다운로드 중 오류가 발생했습니다.');
     }
-    
-    return csvRows.join('\n');
   };
-  
-  const escapeCSV = (text) => {
-    if (!text) return '';
-    // 따옴표 이스케이프 및 특수문자 처리
-    return text.replace(/"/g, '""');
-  };
+
+
 
   const formatProcessingTime = (ms) => {
     if (ms < 1000) return `${ms}ms`;

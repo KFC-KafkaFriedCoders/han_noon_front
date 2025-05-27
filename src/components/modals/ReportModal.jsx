@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { IoMdClose } from 'react-icons/io';
+import { IoMdClose, IoMdDownload } from 'react-icons/io';
 import { HiTrash, HiEye } from 'react-icons/hi2';
 import { useTheme } from '../../context/theme/ThemeContext';
 import { getReportHistory, deleteReport, clearAllReports } from '../../utils/reportStorage';
+import { downloadReportAsCSV } from '../../utils/reportDownload';
 
 const REPORT_COUNT_OPTIONS = [
   { value: 20, label: '20건' },
@@ -65,6 +66,15 @@ const ReportModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleCloseReportView = () => {
     setSelectedReport(null);
+  };
+
+  const handleDownloadReport = (report) => {
+    try {
+      downloadReportAsCSV(report.content, report.count, report.createdAt);
+    } catch (error) {
+      console.error('리포트 다운로드 실패:', error);
+      alert('리포트 다운로드 중 오류가 발생했습니다.');
+    }
   };
 
   if (!isOpen) return null;
@@ -262,6 +272,17 @@ const ReportModal = ({ isOpen, onClose, onSubmit }) => {
                               <HiEye size={16} />
                             </button>
                             <button
+                              onClick={() => handleDownloadReport(report)}
+                              className={`p-1 rounded transition-colors ${
+                                isDarkMode
+                                  ? 'hover:bg-blue-800 text-blue-400'
+                                  : 'hover:bg-blue-100 text-blue-600'
+                              }`}
+                              title="CSV 다운로드"
+                            >
+                              <IoMdDownload size={16} />
+                            </button>
+                            <button
                               onClick={() => handleDeleteReport(report.id)}
                               className={`p-1 rounded transition-colors ${
                                 isDarkMode
@@ -317,14 +338,27 @@ const ReportModal = ({ isOpen, onClose, onSubmit }) => {
               }`}>
                 리포트 상세 - {selectedReport.createdAt} ({selectedReport.count}건)
               </h3>
-              <button
-                onClick={handleCloseReportView}
-                className={`p-2 rounded-full hover:bg-opacity-20 transition-colors ${
-                  isDarkMode ? 'hover:bg-white text-gray-400' : 'hover:bg-gray-500 text-gray-500'
-                }`}
-              >
-                <IoMdClose size={20} />
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handleDownloadReport(selectedReport)}
+                  className={`p-2 rounded-full transition-colors ${
+                    isDarkMode 
+                      ? 'hover:bg-blue-800 text-blue-400 hover:text-blue-300' 
+                      : 'hover:bg-blue-100 text-blue-600 hover:text-blue-700'
+                  }`}
+                  title="CSV 다운로드"
+                >
+                  <IoMdDownload size={20} />
+                </button>
+                <button
+                  onClick={handleCloseReportView}
+                  className={`p-2 rounded-full hover:bg-opacity-20 transition-colors ${
+                    isDarkMode ? 'hover:bg-white text-gray-400' : 'hover:bg-gray-500 text-gray-500'
+                  }`}
+                >
+                  <IoMdClose size={20} />
+                </button>
+              </div>
             </div>
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
               <pre className={`whitespace-pre-wrap text-sm ${
