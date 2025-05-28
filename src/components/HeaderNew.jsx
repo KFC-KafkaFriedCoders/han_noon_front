@@ -7,8 +7,8 @@ import { useWebSocket } from '../hooks/useWebSocket';
 import { convertToCSV, downloadCSV, generateFileName, combineDataSets } from '../utils/csvExport';
 import kfaImg from '../assets/image.png';
 import { useNavigate } from 'react-router-dom';
-import ReportModal from './modals/ReportModal';
-import ReportResultModal from './modals/ReportResultModal';
+import ReportModal from './modals/report/ReportModal';
+import ReportResultModal from './modals/report/ReportResultModal';
 import { reportService } from '../api/reportService';
 
 const HeaderNew = () => {
@@ -57,14 +57,14 @@ const HeaderNew = () => {
   };
 
   // 리포트 생성 요청
-  const handleReportSubmit = async (count) => {
-    console.log(`🚀 리포트 생성 시작: ${count}건`);
+  const handleReportSubmit = async (count, brand = '전체') => {
+    console.log(`🚀 리포트 생성 시작: ${count}건, 브랜드: ${brand}`);
     
     try {
       setReportError(false);
       
       // API 호출
-      const result = await reportService.generateReport(count);
+      const result = await reportService.generateReport(count, brand);
       
       console.log('✅ 리포트 생성 성공:', result);
       

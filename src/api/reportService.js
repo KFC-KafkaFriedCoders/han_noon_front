@@ -40,14 +40,15 @@ export const reportService = {
   /**
    * AI 리포트 생성 요청
    * @param {number} count - 분석할 데이터 건수 (20, 50, 100, 250, 500)
+   * @param {string} brand - 분석할 브랜드 (전체 또는 실제 브랜드명)
    * @returns {Promise<Object>} 리포트 응답 데이터
    */
-  async generateReport(count) {
+  async generateReport(count, brand = '전체') {
     try {
-      console.log(`📊 리포트 생성 요청: ${count}건`);
+      console.log(`📊 리포트 생성 요청: ${count}건, 브랜드: ${brand}`);
       
       const response = await apiClient.get('/generate', {
-        params: { count }
+        params: { count, brand }
       });
       
       console.log('📋 리포트 생성 성공:', response.data);
