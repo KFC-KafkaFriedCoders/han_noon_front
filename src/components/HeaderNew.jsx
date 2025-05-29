@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import ReportModal from './modals/report/ReportModal';
 import ReportResultModal from './modals/report/ReportResultModal';
 import { reportService } from '../api/reportService';
+import { saveReport } from '../utils/reportStorage';
 
 const HeaderNew = () => {
   const navigate = useNavigate();
@@ -67,6 +68,20 @@ const HeaderNew = () => {
       const result = await reportService.generateReport(count, brand);
       
       console.log('✅ 리포트 생성 성공:', result);
+      
+      // 🔥 리포트 저장 로직 추가
+      if (result && result.success !== false) {
+        const saveData = {
+          count: count,
+          brand: brand !== '전체' ? brand : undefined,
+          content: result.report || result.message || JSON.stringify(result),
+          success: true,
+          ...result // 기존 결과 데이터도 포함
+        };
+        
+        const saved = saveReport(saveData);
+        console.log('💾 리포트 저장 결과:', saved ? '성공' : '실패');
+      }
       
       // 성공 시 결과 모달 표시
       setReportResult(result);

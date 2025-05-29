@@ -15,7 +15,7 @@ const ReportDetailModal = ({ isDarkMode, selectedReport, onClose }) => {
   if (!selectedReport) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60">
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[70]">
       <div className={`relative w-full max-w-4xl mx-4 rounded-xl shadow-2xl max-h-[90vh] overflow-hidden ${
         isDarkMode ? 'bg-gray-800' : 'bg-white'
       }`}>

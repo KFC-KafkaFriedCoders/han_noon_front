@@ -5,6 +5,7 @@ import { useReportHistory } from './hooks/useReportHistory';
 import ReportGenerateTab from './tabs/ReportGenerateTab';
 import ReportHistoryTab from './tabs/ReportHistoryTab';
 import ReportDetailModal from './ReportDetailModal';
+import Portal from '../../common/Portal';
 
 const ReportModal = ({ isOpen, onClose, onSubmit }) => {
   const { isDarkMode } = useTheme();
@@ -29,17 +30,17 @@ const ReportModal = ({ isOpen, onClose, onSubmit }) => {
 
   const handleSubmit = async (selectedCount, selectedBrand) => {
     await onSubmit(selectedCount, selectedBrand);
-    // 리포트 생성 후 히스토리 다시 로드
-    setTimeout(() => {
-      loadReportHistory();
-    }, 1000);
+    // 리포트 생성 후 히스토리 즉시 다시 로드
+    // setTimeout 제거하고 즉시 실행
+    loadReportHistory();
   };
 
   if (!isOpen) return null;
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <Portal containerId="report-modal-root">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className={`relative w-full max-w-2xl mx-4 rounded-xl shadow-2xl ${
           isDarkMode ? 'bg-gray-800' : 'bg-white'
         }`}>
@@ -50,7 +51,7 @@ const ReportModal = ({ isOpen, onClose, onSubmit }) => {
             <h2 className={`text-xl font-bold ${
               isDarkMode ? 'text-white' : 'text-gray-900'
             }`}>
-              📊 AI 리포트
+              AI 리포트
             </h2>
             <button
               onClick={onClose}
@@ -115,14 +116,19 @@ const ReportModal = ({ isOpen, onClose, onSubmit }) => {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </Portal>
 
-      {/* 리포트 상세 보기 모달 */}
-      <ReportDetailModal
-        isDarkMode={isDarkMode}
-        selectedReport={selectedReport}
-        onClose={handleCloseReportView}
-      />
+      {/* 리포트 상세 보기 모달 - 별도 Portal에서 렌더링 */}
+      {selectedReport && (
+        <Portal containerId="report-detail-modal-root">
+          <ReportDetailModal
+            isDarkMode={isDarkMode}
+            selectedReport={selectedReport}
+            onClose={handleCloseReportView}
+          />
+        </Portal>
+      )}
     </>
   );
 };

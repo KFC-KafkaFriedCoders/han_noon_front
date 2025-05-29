@@ -8,6 +8,25 @@ export const useReportHistory = () => {
   const [reportHistory, setReportHistory] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
 
+  // 리포트 생성 이벤트 리스너 추가
+  useEffect(() => {
+    const handleStorageChange = () => {
+      console.log('🔄 로컬 스토리지 변경 감지 - 히스토리 업데이트');
+      loadReportHistory();
+    };
+
+    // storage 이벤트 리스너 등록
+    window.addEventListener('storage', handleStorageChange);
+
+    // 커스텀 이벤트 리스너 등록 (같은 페이지 내에서의 변경)
+    window.addEventListener('reportSaved', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('reportSaved', handleStorageChange);
+    };
+  }, []);
+
   // 히스토리 로드
   const loadReportHistory = () => {
     const history = getReportHistory();

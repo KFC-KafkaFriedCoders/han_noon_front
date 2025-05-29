@@ -26,7 +26,7 @@ export const getReportHistory = () => {
  */
 export const saveReport = (reportData) => {
   try {
-    const { count, content, success } = reportData;
+    const { count, content, success, brand } = reportData;
     
     // 실패한 리포트는 저장하지 않음
     if (!success || !content) {
@@ -40,6 +40,7 @@ export const saveReport = (reportData) => {
     const newReport = {
       id: `report_${Date.now()}`,
       count: count,
+      brand: brand, // 브랜드 정보 추가
       content: content,
       createdAt: new Date().toLocaleString('ko-KR', {
         year: 'numeric',
@@ -63,6 +64,9 @@ export const saveReport = (reportData) => {
     
     // 로컬스토리지에 저장
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedReports));
+    
+    // 커스텀 이벤트 발생으로 히스토리 업데이트 알림
+    window.dispatchEvent(new CustomEvent('reportSaved', { detail: newReport }));
     
     console.log(`✅ 리포트 저장 완료: ${newReport.createdAt} (${count}건)`);
     return true;

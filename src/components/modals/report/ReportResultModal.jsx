@@ -2,6 +2,7 @@ import React from 'react';
 import { useTheme } from '../../../context/theme/ThemeContext';
 import ReportSuccessModal from './ReportSuccessModal';
 import ReportErrorModal from './ReportErrorModal';
+import Portal from '../../common/Portal';
 
 const ReportResultModal = ({ isOpen, onClose, reportData, isError }) => {
   const { isDarkMode } = useTheme();
@@ -19,7 +20,8 @@ const ReportResultModal = ({ isOpen, onClose, reportData, isError }) => {
   if (!isOpen || !reportData) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <Portal containerId="report-result-modal-root">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
       {isError ? (
         <ReportErrorModal
           isDarkMode={isDarkMode}
@@ -36,7 +38,8 @@ const ReportResultModal = ({ isOpen, onClose, reportData, isError }) => {
           onBackToGenerate={handleBackToGenerate}
         />
       )}
-    </div>
+      </div>
+    </Portal>
   );
 };
 
