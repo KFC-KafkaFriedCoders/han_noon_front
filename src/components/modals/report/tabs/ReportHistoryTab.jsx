@@ -22,7 +22,6 @@ const ReportHistoryTab = ({
   if (reportHistory.length === 0) {
     return (
       <div className="text-center py-8">
-        <div className={`text-6xl mb-4`}>📊</div>
         <div className={`text-lg font-medium mb-2 ${
           isDarkMode ? 'text-gray-300' : 'text-gray-700'
         }`}>
