@@ -8,7 +8,8 @@ const ReportHistoryTab = ({
   reportHistory, 
   onDeleteReport, 
   onClearAll, 
-  onViewReport 
+  onViewReport,
+  isLoading
 }) => {
   const handleDownloadReport = (report) => {
     try {
@@ -42,10 +43,13 @@ const ReportHistoryTab = ({
       <div className="flex justify-end mb-4">
         <button
           onClick={onClearAll}
+          disabled={isLoading}
           className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-            isDarkMode
-              ? 'bg-red-900 hover:bg-red-800 text-red-300'
-              : 'bg-red-100 hover:bg-red-200 text-red-700'
+            isLoading
+              ? 'cursor-not-allowed opacity-50 bg-gray-500 text-gray-400'
+              : isDarkMode
+                ? 'bg-red-900 hover:bg-red-800 text-red-300'
+                : 'bg-red-100 hover:bg-red-200 text-red-700'
           }`}
         >
           전체 삭제
@@ -79,34 +83,43 @@ const ReportHistoryTab = ({
               <div className="flex space-x-2">
                 <button
                   onClick={() => onViewReport(report)}
+                  disabled={isLoading}
                   className={`p-1 rounded transition-colors ${
-                    isDarkMode
-                      ? 'hover:bg-gray-600 text-gray-400'
-                      : 'hover:bg-gray-200 text-gray-600'
+                    isLoading
+                      ? 'cursor-not-allowed opacity-50'
+                      : isDarkMode
+                        ? 'hover:bg-gray-600 text-gray-400'
+                        : 'hover:bg-gray-200 text-gray-600'
                   }`}
-                  title="리포트 보기"
+                  title={isLoading ? '리포트 생성 중...' : '리포트 보기'}
                 >
                   <HiEye size={16} />
                 </button>
                 <button
                   onClick={() => handleDownloadReport(report)}
+                  disabled={isLoading}
                   className={`p-1 rounded transition-colors ${
-                    isDarkMode
-                      ? 'hover:bg-blue-800 text-blue-400'
-                      : 'hover:bg-blue-100 text-blue-600'
+                    isLoading
+                      ? 'cursor-not-allowed opacity-50'
+                      : isDarkMode
+                        ? 'hover:bg-blue-800 text-blue-400'
+                        : 'hover:bg-blue-100 text-blue-600'
                   }`}
-                  title="CSV 다운로드"
+                  title={isLoading ? '리포트 생성 중...' : 'CSV 다운로드'}
                 >
                   <IoMdDownload size={16} />
                 </button>
                 <button
                   onClick={() => onDeleteReport(report.id)}
+                  disabled={isLoading}
                   className={`p-1 rounded transition-colors ${
-                    isDarkMode
-                      ? 'hover:bg-red-900 text-red-400'
-                      : 'hover:bg-red-100 text-red-600'
+                    isLoading
+                      ? 'cursor-not-allowed opacity-50'
+                      : isDarkMode
+                        ? 'hover:bg-red-900 text-red-400'
+                        : 'hover:bg-red-100 text-red-600'
                   }`}
-                  title="삭제"
+                  title={isLoading ? '리포트 생성 중...' : '삭제'}
                 >
                   <HiTrash size={16} />
                 </button>

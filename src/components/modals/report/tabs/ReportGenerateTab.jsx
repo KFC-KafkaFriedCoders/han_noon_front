@@ -1,7 +1,7 @@
 import React from 'react';
 import { useReportGeneration, REPORT_COUNT_OPTIONS, REPORT_BRAND_OPTIONS } from '../hooks/useReportGeneration';
 
-const ReportGenerateTab = ({ isDarkMode, onSubmit, onClose }) => {
+const ReportGenerateTab = ({ isDarkMode, onSubmit, onClose, isLoading: parentLoading }) => {
   const {
     selectedCount,
     setSelectedCount,
@@ -10,6 +10,9 @@ const ReportGenerateTab = ({ isDarkMode, onSubmit, onClose }) => {
     isLoading,
     handleSubmit
   } = useReportGeneration();
+
+  // 부모 컴포넌트와 내부 로딩 상태 모두 고려
+  const isDisabled = isLoading || parentLoading;
 
   const handleFormSubmit = () => {
     handleSubmit(onSubmit);
@@ -27,10 +30,13 @@ const ReportGenerateTab = ({ isDarkMode, onSubmit, onClose }) => {
         <select
           value={selectedBrand}
           onChange={(e) => setSelectedBrand(e.target.value)}
+          disabled={isDisabled}
           className={`w-full p-3 rounded-lg border-2 transition-all duration-200 ${
-            isDarkMode
-              ? 'border-gray-600 bg-gray-700 text-gray-300 focus:border-blue-500'
-              : 'border-gray-300 bg-white text-gray-700 focus:border-blue-500'
+            isDisabled
+              ? 'cursor-not-allowed opacity-50'
+              : isDarkMode
+                ? 'border-gray-600 bg-gray-700 text-gray-300 focus:border-blue-500'
+                : 'border-gray-300 bg-white text-gray-700 focus:border-blue-500'
           }`}
         >
           {REPORT_BRAND_OPTIONS.map(option => (
@@ -53,14 +59,17 @@ const ReportGenerateTab = ({ isDarkMode, onSubmit, onClose }) => {
             <button
               key={option.value}
               onClick={() => setSelectedCount(option.value)}
+              disabled={isDisabled}
               className={`p-3 rounded-lg border-2 transition-all duration-200 ${
-                selectedCount === option.value
-                  ? isDarkMode
-                    ? 'border-blue-500 bg-blue-500 bg-opacity-20 text-blue-400'
-                    : 'border-blue-500 bg-blue-50 text-blue-600'
-                  : isDarkMode
-                    ? 'border-gray-600 hover:border-gray-500 text-gray-300'
-                    : 'border-gray-300 hover:border-gray-400 text-gray-700'
+                isDisabled
+                  ? 'cursor-not-allowed opacity-50'
+                  : selectedCount === option.value
+                    ? isDarkMode
+                      ? 'border-blue-500 bg-blue-500 bg-opacity-20 text-blue-400'
+                      : 'border-blue-500 bg-blue-50 text-blue-600'
+                    : isDarkMode
+                      ? 'border-gray-600 hover:border-gray-500 text-gray-300'
+                      : 'border-gray-300 hover:border-gray-400 text-gray-700'
               }`}
             >
               <div className="font-semibold">{option.label}</div>
@@ -87,25 +96,27 @@ const ReportGenerateTab = ({ isDarkMode, onSubmit, onClose }) => {
       <div className="flex space-x-3">
         <button
           onClick={onClose}
-          disabled={isLoading}
+          disabled={isDisabled}
           className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${
-            isDarkMode
-              ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            isDisabled
+              ? 'opacity-50 cursor-not-allowed bg-gray-500 text-gray-400'
+              : isDarkMode
+                ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+          }`}
         >
           취소
         </button>
         <button
           onClick={handleFormSubmit}
-          disabled={isLoading}
+          disabled={isDisabled}
           className={`flex-1 py-3 px-4 rounded-lg font-medium text-white transition-colors ${
-            isLoading
+            isDisabled
               ? 'bg-gray-500 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
-          {isLoading ? (
+          {isDisabled ? (
             <div className="flex items-center justify-center">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
               생성 중...
